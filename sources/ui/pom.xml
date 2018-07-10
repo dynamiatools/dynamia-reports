@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>tools.dynamia.reports</groupId>
+        <artifactId>tools.dynamia.reports.parent</artifactId>
+        <version>0.1</version>
+    </parent>
+
+
+    <name>DynamiaReports - UI (${project.version})</name>
+    <artifactId>tools.dynamia.reports.ui</artifactId>
+    <version>0.1</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>tools.dynamia.reports</groupId>
+            <artifactId>tools.dynamia.reports.core</artifactId>
+            <version>0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.zk.crud</artifactId>
+            <version>${dynamiatools.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.reports</artifactId>
+            <version>3.1.0.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-json</artifactId>
+            <version>${groovy.version}</version>
+        </dependency>
+    </dependencies>
+
+    
+</project>

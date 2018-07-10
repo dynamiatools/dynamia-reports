@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="api" />
+        <module name="core" />
+        <module name="TicketsERP" />
+        <module name="tools.dynamia.actions" />
+        <module name="tools.dynamia.app" />
+        <module name="tools.dynamia.commons" />
+        <module name="tools.dynamia.crud" />
+        <module name="tools.dynamia.domain" />
+        <module name="tools.dynamia.domain.jpa" />
+        <module name="tools.dynamia.domain.neo4j" />
+        <module name="tools.dynamia.integration" />
+        <module name="tools.dynamia.io" />
+        <module name="tools.dynamia.navigation" />
+        <module name="tools.dynamia.reports" />
+        <module name="tools.dynamia.templates" />
+        <module name="tools.dynamia.ui" />
+        <module name="tools.dynamia.viewers" />
+        <module name="tools.dynamia.web" />
+        <module name="tools.dynamia.zk" />
+        <module name="tools.dynamia.zk.actions" />
+        <module name="tools.dynamia.zk.app" />
+        <module name="tools.dynamia.zk.crud" />
+        <module name="tools.dynamia.zk.reports" />
+        <module name="tools.dynamia.zk.viewers" />
+        <module name="ui" />
+      </profile>
+    </annotationProcessing>
+  </component>
+</project>
