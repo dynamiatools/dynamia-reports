@@ -82,5 +82,12 @@
         </plugins>
     </build>
 
+    <distributionManagement>
+        <repository>
+            <id>nexus</id>
+            <url>http://nexus.dynamiaweb.com/repository/releases/</url>
+        </repository>
+    </distributionManagement>
+
 
 </project>
