@@ -7,7 +7,24 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="api" />
+        <module name="com.dynamiasoluciones.connect.api" />
+        <module name="com.dynamiasoluciones.connect.core" />
+        <module name="com.dynamiasoluciones.modules.inventario" />
+        <module name="com.dynamiasoluciones.modules.inventario.api" />
+        <module name="com.dynamiasoluciones.modules.inventario.compras" />
+        <module name="com.dynamiasoluciones.modules.inventario.control" />
+        <module name="com.dynamiasoluciones.modules.inventario.control.ui" />
+        <module name="com.dynamiasoluciones.modules.inventario.pedidos" />
+        <module name="com.dynamiasoluciones.modules.inventario.pedidos.ui" />
+        <module name="com.dynamiasoluciones.modules.inventario.ui" />
+        <module name="com.dynamiasoluciones.modules.inventario.ventas" />
+        <module name="com.dynamiasoluciones.modules.ventas" />
+        <module name="com.dynamiasoluciones.modules.ventas.api" />
+        <module name="com.dynamiasoluciones.modules.ventas.rest" />
+        <module name="com.dynamiasoluciones.modules.ventas.rutas" />
+        <module name="com.dynamiasoluciones.modules.ventas.ui" />
         <module name="core" />
+        <module name="DynamiaConnect" />
         <module name="TicketsERP" />
         <module name="tools.dynamia.actions" />
         <module name="tools.dynamia.app" />
@@ -33,5 +50,9 @@
         <module name="ui" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="ModuloInventario" target="1.8" />
+      <module name="ModuloVenta" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>
