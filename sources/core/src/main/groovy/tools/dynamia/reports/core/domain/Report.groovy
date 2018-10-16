@@ -1,8 +1,11 @@
 package tools.dynamia.reports.core.domain
 
 import tools.dynamia.domain.contraints.NotEmpty
+import tools.dynamia.domain.query.QueryConditions
 import tools.dynamia.domain.query.QueryParameters
 import tools.dynamia.domain.util.DomainUtils
+import tools.dynamia.integration.Containers
+import tools.dynamia.modules.saas.api.AccountServiceAPI
 import tools.dynamia.modules.saas.api.SimpleEntitySaaS
 
 import javax.persistence.Basic
@@ -15,6 +18,9 @@ import javax.persistence.OneToMany
 import javax.persistence.OneToOne
 import javax.persistence.Table
 import javax.validation.constraints.NotNull
+import java.awt.Container
+
+import static tools.dynamia.domain.query.QueryConditions.eq
 
 @Entity
 @Table(name = "rpt_reports")
@@ -40,7 +46,12 @@ class Report extends SimpleEntitySaaS {
     boolean active = true
 
     static List<Report> findActivesByGroup(ReportGroup reportGroup) {
-        return DomainUtils.lookupCrudService().find(Report, QueryParameters.with("group", reportGroup).add("active", true).orderBy("name"))
+        def accountsApi = Containers.get().findObject(AccountServiceAPI)
+        def accounts = new ArrayList([accountsApi.systemAccountId, accountsApi.currentAccountId])
+
+        return DomainUtils.lookupCrudService().find(Report, QueryParameters.with("group.name", eq(reportGroup.name))
+                .add("active", true)
+                .add("accountId", QueryConditions.in(accounts)).orderBy("name"))
     }
 
     ReportFilter findFilter(String name) {

@@ -1,4 +1,4 @@
-view: table
+view: entityfilters
 beanClass: tools.dynamia.reports.core.domain.Report
 autofields: false
 
@@ -10,7 +10,7 @@ fields:
   active:
   accountId:
     label: Account
-    component: entityreflabel
+    component: entityrefpicker
     params:
       entityAlias: Account
       forceVisible: true

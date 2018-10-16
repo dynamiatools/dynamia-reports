@@ -4,7 +4,6 @@ import tools.dynamia.commons.BeanUtils
 import tools.dynamia.domain.jdbc.JdbcDataSet
 import tools.dynamia.domain.jdbc.Row
 import tools.dynamia.reports.core.domain.Report
-import tools.dynamia.reports.core.domain.ReportField
 
 class ReportData {
 
@@ -35,7 +34,7 @@ class ReportData {
             def fields = report.fields.collect { it.name }
             data.fieldNames = fields
             collection.each { obj ->
-                data.entries << ReportDataEntry.build(fields, row)
+                data.entries << ReportDataEntry.build(fields, obj)
             }
         }
 

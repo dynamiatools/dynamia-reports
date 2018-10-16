@@ -1,10 +1,14 @@
 package tools.dynamia.reports.core.services.impl
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import tools.dynamia.domain.jdbc.JdbcHelper
+import tools.dynamia.domain.query.QueryConditions
+import tools.dynamia.domain.query.QueryParameters
 import tools.dynamia.domain.services.AbstractService
 import tools.dynamia.integration.sterotypes.Service
+import tools.dynamia.modules.saas.api.AccountServiceAPI
 import tools.dynamia.reports.core.ReportData
 import tools.dynamia.reports.core.ReportFilters
 import tools.dynamia.reports.core.ReportsUtils
@@ -20,10 +24,14 @@ import java.sql.Connection
 @Service
 class ReportsServiceImp extends AbstractService implements ReportsService {
 
+    @Autowired
+    private AccountServiceAPI accountServiceAPI
+
 
     @Override
     ReportData execute(Report report, ReportFilters filters, ReportDataSource datasource) {
         ReportData data = null
+        loadDefaultFilters(report, filters)
         switch (report.queryLang) {
             case "sql":
                 data = executeSQL(report, filters, datasource)
@@ -36,10 +44,33 @@ class ReportsServiceImp extends AbstractService implements ReportsService {
         return data
     }
 
+    def loadDefaultFilters(Report report, ReportFilters reportFilters) {
+        boolean checkQuery = true
+        if (!reportFilters.empty) {
+            def filter = reportFilters.getFilter("accountId")
+            if (filter != null) {
+                reportFilters.add(filter, accountServiceAPI.currentAccountId)
+                checkQuery = false
+            }
+        }
+
+        if (checkQuery && report.queryScript.contains(":accountId")) {
+            def filter = new ReportFilter(name: "accountId")
+            def systemAccountId = accountServiceAPI.systemAccountId
+            if (report.accountId != systemAccountId) {
+                reportFilters.add(filter, report.accountId)
+            } else {
+                reportFilters.add(filter, accountServiceAPI.currentAccountId)
+            }
+
+        }
+
+    }
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     Report loadReportModel(Long id) {
-        def report = crudService().find(Report, id)
+        def report = crudService().findSingle(Report, QueryParameters.with("id", id).add("accountId", QueryConditions.isNotNull()))
         report.fields.size()
         report.filters.size()
         report.queryScript.size()
@@ -85,7 +116,7 @@ class ReportsServiceImp extends AbstractService implements ReportsService {
     static String buildSqlScript(String query, ReportFilters filters) {
         StringBuilder filters_sql = new StringBuilder()
 
-        if (!filters.empty) {
+        if (!filters.empty && !query.contains("where")) {
             filters_sql.append("where 1=1 ")
             for (String filterName : filters.filtersNames) {
                 ReportFilter filter = filters.getFilter(filterName)

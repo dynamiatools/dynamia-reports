@@ -16,7 +16,7 @@ import tools.dynamia.reports.ui.ReportViewer
 import tools.dynamia.ui.UIMessages
 import tools.dynamia.zk.navigation.ComponentPage
 
-import javax.persistence.EntityManager
+import javax.persistence.EntityManagerFactory
 import javax.sql.DataSource
 
 @InstallAction
@@ -69,8 +69,8 @@ class ViewReportAction extends AbstractCrudAction {
             DataSource dataSource = Containers.get().findObject(DataSource.class)
             return new ReportDataSource("Database", dataSource)
         } else {
-            EntityManager em = Containers.get().findObject(EntityManager.class)
-            return ReportDataSource("EntityManager", em)
+            EntityManagerFactory em = Containers.get().findObject(EntityManagerFactory.class)
+            return new ReportDataSource("EntityManager", em)
         }
 
     }

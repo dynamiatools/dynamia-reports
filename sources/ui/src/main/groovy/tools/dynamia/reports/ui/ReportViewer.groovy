@@ -3,8 +3,6 @@ package tools.dynamia.reports.ui
 import converters.CurrencySimple
 import converters.Decimal
 import converters.Integer
-import org.zkoss.zhtml.H3
-import org.zkoss.zhtml.Text
 import org.zkoss.zk.ui.event.Events
 import org.zkoss.zk.ui.event.SortEvent
 import org.zkoss.zul.*
@@ -103,6 +101,7 @@ class ReportViewer extends Div implements ActionEventBuilder {
         executeButton = new Button(messages.get("execute"))
         executeButton.addEventListener(Events.ON_CLICK, { execute() })
         executeButton.zclass = "btn btn-primary"
+        executeButton.iconSclass = "fa fa-play"
         buttons.appendChild(executeButton)
 
         exportButton = new Button(messages.get("exportExcel"))

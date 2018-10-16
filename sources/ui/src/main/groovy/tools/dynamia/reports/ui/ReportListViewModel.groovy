@@ -4,6 +4,8 @@ import org.zkoss.bind.annotation.BindingParam
 import org.zkoss.bind.annotation.Command
 import org.zkoss.bind.annotation.Init
 import tools.dynamia.integration.Containers
+import tools.dynamia.navigation.ModuleContainer
+import tools.dynamia.navigation.NavigationRestrictions
 import tools.dynamia.reports.core.domain.Report
 import tools.dynamia.reports.core.domain.ReportGroup
 import tools.dynamia.reports.ui.actions.ViewReportAction
@@ -23,9 +25,33 @@ class ReportListViewModel {
         ReportGroup.findActives().each { grp ->
             List<Report> list = Report.findActivesByGroup(grp)
             if (!list.empty) {
-                reports << new Reports(group: grp, list: list)
+                Reports currentReports = findReports(grp)
+                if (currentReports == null) {
+                    currentReports = new Reports(group: grp)
+                    reports << currentReports
+                }
+                currentReports.list.addAll(list)
             }
         }
+        filterReportsByModules()
+    }
+
+    def filterReportsByModules() {
+        def modules = Containers.get().findObject(ModuleContainer)
+        def toRemove = []
+        reports.each { r ->
+            if (r.group.module != null && !r.group.module.empty) {
+                def module = modules.getModuleById(r.group.module)
+                if (module != null && !NavigationRestrictions.allowAccess(module)) {
+                    toRemove << r
+                }
+            }
+        }
+        reports.removeAll(toRemove)
+    }
+
+    Reports findReports(ReportGroup reportGroup) {
+        return reports.find { it.group.name == reportGroup.name }
     }
 
     @Command
@@ -39,6 +65,6 @@ class ReportListViewModel {
 
 class Reports {
     ReportGroup group
-    List<Report> list
+    List<Report> list = new ArrayList<>()
 
 }

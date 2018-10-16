@@ -5,18 +5,25 @@ autofields: false
 fields:
   name:
   group:
-  description:
+  accountId:
+    label: Account
+    component: entityrefpicker
     params:
-      span: 2
+      entityAlias: Account
+      forceVisible: true
+  description:
   queryLang:
   autofields:
-  active:
+
+
   queryScript:
     params:
-      span: 2
+      span: 3
       height: 300px
       multiline: true
       style: 'font-family: monospace'
+
+  active:
 
   filters:
     component: crudview
@@ -25,4 +32,4 @@ fields:
     component: crudview
 
 layout:
-  columns: 2
+  columns: 3

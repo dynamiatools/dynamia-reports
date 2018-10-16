@@ -7,12 +7,12 @@
     <parent>
         <groupId>tools.dynamia.reports</groupId>
         <artifactId>tools.dynamia.reports.parent</artifactId>
-        <version>0.1</version>
+        <version>0.5</version>
     </parent>
 
     <name>DynamiaReports - API (${project.version})</name>
     <artifactId>tools.dynamia.reports.api</artifactId>
-    <version>0.1</version>
+    <version>0.5</version>
 
 
 </project>

@@ -1,0 +1,4 @@
+view: crud
+beanClass: tools.dynamia.reports.core.domain.Report
+autofields: false
+controller: tools.dynamia.reports.ui.controllers.ReportCrudController
