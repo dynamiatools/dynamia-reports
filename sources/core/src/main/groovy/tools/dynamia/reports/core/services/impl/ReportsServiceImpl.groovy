@@ -74,6 +74,7 @@ class ReportsServiceImp extends AbstractService implements ReportsService {
         report.fields.size()
         report.filters.size()
         report.queryScript.size()
+        report.charts.size()
 
         return report
     }
@@ -114,12 +115,16 @@ class ReportsServiceImp extends AbstractService implements ReportsService {
 
 
     static String buildSqlScript(String query, ReportFilters filters) {
-        StringBuilder filters_sql = new StringBuilder()
+        query = query.replace("\n", " ").replace("\t", " ")
+        StringBuilder filters_sql = new StringBuilder("")
 
         if (!filters.empty && !query.contains("where")) {
             filters_sql.append("where 1=1 ")
-            for (String filterName : filters.filtersNames) {
-                ReportFilter filter = filters.getFilter(filterName)
+        }
+
+        for (String filterName : filters.filtersNames) {
+            ReportFilter filter = filters.getFilter(filterName)
+            if (filter.condition) {
                 filters_sql.append(" and ").append(filter.condition)
             }
         }

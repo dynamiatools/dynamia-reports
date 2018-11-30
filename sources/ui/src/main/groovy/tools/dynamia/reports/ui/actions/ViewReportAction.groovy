@@ -33,6 +33,9 @@ class ViewReportAction extends AbstractCrudAction {
         applicableClass = Report.class
         applicableStates = CrudState.get(CrudState.READ, CrudState.UPDATE)
         menuSupported = true
+        image = "play"
+        background = "#28a5d4"
+        color = "white"
     }
 
     @Override
@@ -55,7 +58,7 @@ class ViewReportAction extends AbstractCrudAction {
             }))
             viewer.renderActions()
         }
-
+        viewer.execute()
         def title = Messages.get(ViewReportAction, "pageTitle")
         def page = new ComponentPage("report$report.id", "${title}: $report.name", viewer)
         page.alwaysAllowed = true

@@ -3,6 +3,7 @@ package tools.dynamia.reports.ui
 import converters.CurrencySimple
 import converters.Decimal
 import converters.Integer
+import org.zkoss.zhtml.Hr
 import org.zkoss.zk.ui.event.Events
 import org.zkoss.zk.ui.event.SortEvent
 import org.zkoss.zul.*
@@ -15,6 +16,7 @@ import tools.dynamia.commons.ValueWrapper
 import tools.dynamia.commons.reflect.AccessMode
 import tools.dynamia.commons.reflect.PropertyInfo
 import tools.dynamia.crud.FilterCondition
+import tools.dynamia.domain.Identifiable
 import tools.dynamia.domain.ValidationError
 import tools.dynamia.domain.query.QueryCondition
 import tools.dynamia.domain.query.QueryParameters
@@ -34,6 +36,8 @@ import tools.dynamia.ui.UIMessages
 import tools.dynamia.viewers.Field
 import tools.dynamia.viewers.impl.DefaultViewDescriptor
 import tools.dynamia.zk.actions.ButtonActionRenderer
+import tools.dynamia.zk.addons.chartjs.CategoryChartjsData
+import tools.dynamia.zk.addons.chartjs.Chartjs
 import tools.dynamia.zk.crud.ui.EntityFiltersPanel
 
 class ReportViewer extends Div implements ActionEventBuilder {
@@ -51,6 +55,7 @@ class ReportViewer extends Div implements ActionEventBuilder {
     private Button exportButton
     private Hlayout buttons
     private List<Action> actions
+    private List<Chartjs> currentCharts
 
     ReportViewer(ReportsService service, Report report, ReportDataSource dataSource) {
         this.service = service
@@ -87,12 +92,22 @@ class ReportViewer extends Div implements ActionEventBuilder {
 
             vflex = "1"
             hflex = "1"
-            east.width = "25%"
+            east.width = "15%"
             east.collapsible = true
             east.splittable = true
             east.title = messages.get("filters")
-
         }
+
+        if (report.chartable) {
+            layout.with {
+                appendChild(new West())
+
+                west.width = "40%"
+                west.splittable = true
+                west.autoscroll = true
+            }
+        }
+
         appendChild(layout)
 
 
@@ -246,8 +261,9 @@ class ReportViewer extends Div implements ActionEventBuilder {
                 return opt.value
             } else if (filterValue.value instanceof Enum && report.queryLang == "sql") {
                 return filterValue.value.ordinal()
+            } else if (filterValue.value instanceof Identifiable) {
+                return filterValue.value.id
             } else {
-
                 return filterValue.value
             }
         } else {
@@ -288,7 +304,6 @@ class ReportViewer extends Div implements ActionEventBuilder {
     }
 
     def updateDataView() {
-
 
         def fieldsNames = report.autofields ? reportData.fieldNames : report.fields.collect { it.name }
 
@@ -365,8 +380,59 @@ class ReportViewer extends Div implements ActionEventBuilder {
                     footer.setLabel(footerValue.toString())
                 }
             }
+        }
+        try {
+            updateChartView()
+        } catch (Exception e) {
+            UIMessages.showMessage(messages.get("errorCharting") + ":${e.message}", MessageType.ERROR)
+            layout.west?.detach()
+        }
+
+    }
+
+    def updateChartView() {
+        if (report.chartable && report.charts && layout.west) {
+            layout.west.children.clear()
+            currentCharts = []
+
+            def chartLayout = new Vlayout()
+            layout.west.appendChild(chartLayout)
+
+            report.charts.each { c ->
+                def data = new CategoryChartjsData()
+                if (c.grouped) {
+                    Map<String, Number> groups = new HashMap<>()
+                    reportData.getEntries().each {
+                        def label = it.values[c.labelField].toString()
+                        def value = (Number) it.values[c.valueField]
+                        if (value == null) {
+                            value = 0
+                        }
+
+                        def sum = groups.get(label)
+                        sum = sum == null ? value : sum + value
+                        groups.put(label, sum)
+                    }
+                    groups.each { k, v -> data.add(k, v) }
+                } else {
+                    reportData.getEntries().each {
+                        def label = it.values[c.labelField].toString()
+                        def value = (Number) it.values[c.valueField]
+                        data.add(label, value)
+                    }
+                }
+
+                def chart = new Chartjs()
+                chart.type = c.type
+                chart.data = data
+                chart.title = c.title
+                currentCharts << chart
 
 
+
+                chartLayout.appendChild(chart)
+                chartLayout.appendChild(new Hr())
+            }
         }
     }
 
@@ -417,6 +483,26 @@ class ReportViewer extends Div implements ActionEventBuilder {
         return exportButton
     }
 
+    Report getReport() {
+        return report
+    }
+
+    List<Chartjs> getCurrentCharts() {
+        return currentCharts
+    }
+
+    ReportData getReportData() {
+        return reportData
+    }
+
+    Borderlayout getLayout() {
+        return layout
+    }
+
+    Listbox getDataView() {
+        return dataView
+    }
+
     void addAction(Action action) {
         actions << action
     }
@@ -434,4 +520,5 @@ class ReportViewer extends Div implements ActionEventBuilder {
     ActionEvent buildActionEvent(Object source, Map<String, Object> params) {
         return new ActionEvent(report, this, params)
     }
+
 }

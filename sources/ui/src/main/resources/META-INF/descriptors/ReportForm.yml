@@ -13,17 +13,19 @@ fields:
       forceVisible: true
   description:
   queryLang:
+    visible: false
+  chartable:
   autofields:
-
-
-  queryScript:
-    params:
-      span: 3
-      height: 300px
-      multiline: true
-      style: 'font-family: monospace'
-
   active:
+  queryScript:
+    component: aceditor
+    params:
+      mode: sql
+      span: 4
+      height: 400px
+
+
+
 
   filters:
     component: crudview
@@ -31,5 +33,8 @@ fields:
   fields:
     component: crudview
 
+  charts:
+    component: crudview
+
 layout:
-  columns: 3
+  columns: 4

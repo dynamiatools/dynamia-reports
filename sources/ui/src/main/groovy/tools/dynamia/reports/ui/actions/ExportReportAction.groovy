@@ -22,9 +22,11 @@ class ExportReportAction extends AbstractCrudAction {
     @Autowired
     ExportReportAction(ReportsService service) {
         this.service = service
-        name = Messages.get(ExportReportAction,"export")
+        name = Messages.get(ExportReportAction, "export")
+        image = "down"
         applicableClass = Report.class
         menuSupported = true
+       
     }
 
     @Override

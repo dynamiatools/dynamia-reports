@@ -14,8 +14,8 @@ import javax.validation.constraints.NotNull
 
 @Entity
 @Table(name = "rpt_reports_fields")
-@Descriptor(fields = ["name", "label", "dataType", "align", "width", "cellStyle", "columnStyle", "upperCase",
-        "format", "description", "order"], viewParams = "columns: 4")
+@Descriptor(fields = ["name", "label", "dataType", "align", "width", "cellStyle", "columnStyle",
+        "format", "description", "upperCase", "order"], viewParams = "columns: 4")
 class ReportField extends SimpleEntitySaaS {
 
     @ManyToOne
@@ -36,4 +36,8 @@ class ReportField extends SimpleEntitySaaS {
     String columnStyle
     boolean upperCase
 
+    @Override
+    String toString() {
+        return name
+    }
 }

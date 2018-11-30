@@ -41,9 +41,13 @@ class Report extends SimpleEntitySaaS {
     List<ReportFilter> filters = new ArrayList<>()
     @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
     List<ReportField> fields = new ArrayList<>()
+    @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<ReportChart> charts = new ArrayList<>()
 
     boolean autofields = true
     boolean active = true
+    boolean chartable
+
 
     static List<Report> findActivesByGroup(ReportGroup reportGroup) {
         def accountsApi = Containers.get().findObject(AccountServiceAPI)
@@ -60,5 +64,10 @@ class Report extends SimpleEntitySaaS {
 
     ReportField findField(String name) {
         return fields.find { it.name == name }
+    }
+
+    @Override
+    String toString() {
+        return name
     }
 }

@@ -108,5 +108,9 @@ class ReportFilter extends SimpleEntitySaaS {
         return options
     }
 
+    @Override
+    String toString() {
+        return name
+    }
 }
 

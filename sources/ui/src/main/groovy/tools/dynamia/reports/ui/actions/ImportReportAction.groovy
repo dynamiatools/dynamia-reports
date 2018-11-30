@@ -8,10 +8,7 @@ import tools.dynamia.commons.Messages
 import tools.dynamia.crud.AbstractCrudAction
 import tools.dynamia.crud.CrudActionEvent
 import tools.dynamia.domain.query.QueryConditions
-import tools.dynamia.reports.core.domain.Report
-import tools.dynamia.reports.core.domain.ReportField
-import tools.dynamia.reports.core.domain.ReportFilter
-import tools.dynamia.reports.core.domain.ReportGroup
+import tools.dynamia.reports.core.domain.*
 import tools.dynamia.reports.core.services.ReportsService
 import tools.dynamia.ui.UIMessages
 
@@ -23,8 +20,10 @@ class ImportReportAction extends AbstractCrudAction {
     @Autowired
     ImportReportAction(ReportsService service) {
         this.service = service
-        name = Messages.get(ImportReportAction,"import")
+        name = Messages.get(ImportReportAction, "import")
         applicableClass = Report.class
+        image = "up"
+
 
     }
 
@@ -55,7 +54,7 @@ class ImportReportAction extends AbstractCrudAction {
         report.accountId = report.group.accountId
 
         report.filters = new ArrayList<>()
-        data["filters"].each {
+        data["filters"]?.each {
             def filter = new ReportFilter(it)
             filter.report = report
             filter.accountId = report.group.accountId
@@ -63,11 +62,19 @@ class ImportReportAction extends AbstractCrudAction {
         }
 
         report.fields = new ArrayList<>()
-        data["fields"].each {
+        data["fields"]?.each {
             def field = new ReportField(it)
             field.report = report
             field.accountId = report.group.accountId
             report.fields << field
+        }
+
+        report.charts = new ArrayList<>()
+        data["charts"]?.each {
+            def chart = new ReportChart(it)
+            chart.report = report
+            chart.accountId = report.group.accountId
+            report.charts << chart
         }
 
         report.name = "$report.name (imported)"
