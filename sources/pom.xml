@@ -13,7 +13,7 @@
 
     <properties>
        <dynamiatools.version>3.2.0.Final</dynamiatools.version>
-        <saas.version>2.0.0</saas.version>
+        <saas.version>2.1.0</saas.version>
 
 
         <java.version>1.8</java.version>
