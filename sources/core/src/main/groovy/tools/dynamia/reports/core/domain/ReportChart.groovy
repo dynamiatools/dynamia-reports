@@ -15,8 +15,7 @@ package tools.dynamia.reports.core.domain
 import tools.dynamia.domain.Descriptor
 import tools.dynamia.domain.contraints.NotEmpty
 import tools.dynamia.modules.saas.api.SimpleEntitySaaS
-import tools.dynamia.reports.core.domain.enums.DataType
-import tools.dynamia.reports.core.domain.enums.TextAlign
+import tools.dynamia.modules.saas.jpa.SimpleEntitySaaS
 
 import javax.persistence.Column
 import javax.persistence.Entity

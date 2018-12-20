@@ -1,11 +1,10 @@
 package tools.dynamia.reports.core.domain
 
-import tools.dynamia.domain.Descriptor
 import tools.dynamia.domain.contraints.NotEmpty
 import tools.dynamia.domain.jdbc.JdbcDataSet
 import tools.dynamia.domain.jdbc.JdbcHelper
 import tools.dynamia.domain.jdbc.Row
-import tools.dynamia.modules.saas.api.SimpleEntitySaaS
+import tools.dynamia.modules.saas.jpa.SimpleEntitySaaS
 import tools.dynamia.reports.api.EnumFilterProvider
 import tools.dynamia.reports.core.ReportFilterOption
 import tools.dynamia.reports.core.ReportsException
@@ -13,7 +12,6 @@ import tools.dynamia.reports.core.ReportsUtils
 import tools.dynamia.reports.core.domain.enums.DataType
 import tools.dynamia.reports.core.services.impl.ReportDataSource
 
-import javax.management.Descriptor
 import javax.persistence.*
 import java.sql.Connection
 
@@ -74,9 +72,10 @@ class ReportFilter extends SimpleEntitySaaS {
         if (report.queryLang == "sql") {
             Connection connection = ReportsUtils.getJdbcConnection(dataSource)
             def jdbc = new JdbcHelper(connection)
-            JdbcDataSet result = jdbc.query(queryValues)
 
-            result.columnsLabels.empty
+            JdbcDataSet result = jdbc.query(ReportsUtils.checkQuery(queryValues))
+
+
             for (Row row : result) {
                 row.loadAll(result.columnsLabels)
                 Object value = row.col(result.columnsLabels[0])

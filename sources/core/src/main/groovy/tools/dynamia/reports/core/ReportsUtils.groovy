@@ -1,8 +1,11 @@
 package tools.dynamia.reports.core
 
+import tools.dynamia.domain.ValidationError
 import tools.dynamia.integration.Containers
+import tools.dynamia.modules.saas.api.AccountServiceAPI
 import tools.dynamia.reports.api.EntityFilterProvider
 import tools.dynamia.reports.api.EnumFilterProvider
+import tools.dynamia.reports.core.domain.Report
 import tools.dynamia.reports.core.services.impl.ReportDataSource
 
 import javax.persistence.EntityManager
@@ -46,5 +49,33 @@ class ReportsUtils {
 
     static List<EntityFilterProvider> findEntityFiltersProvider() {
         return Containers.get().findObjects(EntityFilterProvider)
+    }
+
+    static String checkQuery(String query) {
+        if (query == null) {
+            throw new ValidationError("Invalid Query")
+        }
+        if (query.toLowerCase().contains("delete ") || query.toLowerCase().contains("update ")) {
+            throw new ValidationError("Danger query detected: $query")
+        }
+
+        if (query.contains(":accountId")) {
+            AccountServiceAPI accountServiceAPI = Containers.get().findObject(AccountServiceAPI)
+            if (accountServiceAPI != null) {
+                query = query.replaceAll(":accountId", String.valueOf(accountServiceAPI.getCurrentAccountId()))
+            }
+        }
+        return query
+    }
+
+    static ReportDataSource findDatasource(Report report) {
+        if (report.queryLang == "sql") {
+            DataSource dataSource = Containers.get().findObject(DataSource.class)
+            return new ReportDataSource("Database", dataSource)
+        } else {
+            EntityManagerFactory em = Containers.get().findObject(EntityManagerFactory.class)
+            return new ReportDataSource("EntityManager", em)
+        }
+
     }
 }

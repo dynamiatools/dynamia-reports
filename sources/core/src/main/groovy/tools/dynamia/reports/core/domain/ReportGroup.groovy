@@ -7,6 +7,7 @@ import tools.dynamia.domain.util.DomainUtils
 import tools.dynamia.integration.Containers
 import tools.dynamia.modules.saas.api.AccountServiceAPI
 import tools.dynamia.modules.saas.api.SimpleEntitySaaS
+import tools.dynamia.modules.saas.jpa.SimpleEntitySaaS
 
 import javax.persistence.Entity
 import javax.persistence.Table

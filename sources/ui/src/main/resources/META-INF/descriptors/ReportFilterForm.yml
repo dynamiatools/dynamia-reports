@@ -17,17 +17,18 @@ fields:
   entityClassName:
     component: providerpickerbox
     params:
-        className: tools.dynamia.reports.api.EntityFilterProvider
-        nameField: name
-        idField: entityClassName
+      className: tools.dynamia.reports.api.EntityFilterProvider
+      nameField: name
+      idField: entityClassName
   defaultValue:
   values:
     params:
       span: 4
   queryValues:
+    component: aceditor
     params:
+      mode: sql
       span: 4
-      multiline: true
       height: 80px
   order:
 layout:

@@ -4,6 +4,7 @@ import converters.CurrencySimple
 import converters.Decimal
 import converters.Integer
 import org.zkoss.zhtml.Hr
+import org.zkoss.zk.ui.Component
 import org.zkoss.zk.ui.event.Events
 import org.zkoss.zk.ui.event.SortEvent
 import org.zkoss.zul.*
@@ -35,6 +36,7 @@ import tools.dynamia.ui.MessageType
 import tools.dynamia.ui.UIMessages
 import tools.dynamia.viewers.Field
 import tools.dynamia.viewers.impl.DefaultViewDescriptor
+import tools.dynamia.web.util.HttpUtils
 import tools.dynamia.zk.actions.ButtonActionRenderer
 import tools.dynamia.zk.addons.chartjs.CategoryChartjsData
 import tools.dynamia.zk.addons.chartjs.Chartjs
@@ -53,9 +55,13 @@ class ReportViewer extends Div implements ActionEventBuilder {
     private ReportData reportData
     private Button executeButton
     private Button exportButton
+    private Button reloadButton
     private Hlayout buttons
     private List<Action> actions
     private List<Chartjs> currentCharts
+    private Component filtersContainer
+    private Component dataViewContainer
+    private Component chartsContainer
 
     ReportViewer(ReportsService service, Report report, ReportDataSource dataSource) {
         this.service = service
@@ -85,32 +91,21 @@ class ReportViewer extends Div implements ActionEventBuilder {
         vflex = "1"
         layout = new Borderlayout()
         layout.with {
-
             appendChild(new Center())
-            appendChild(new East())
             appendChild(new South())
-
             vflex = "1"
             hflex = "1"
-            east.width = "15%"
-            east.collapsible = true
-            east.splittable = true
-            east.title = messages.get("filters")
+            south.style = "padding-top: 3px "
         }
 
-        if (report.chartable) {
-            layout.with {
-                appendChild(new West())
+        dataViewContainer = layout.center
 
-                west.width = "40%"
-                west.splittable = true
-                west.autoscroll = true
-            }
+        if (HttpUtils.isSmartphone()) {
+            initMobileLayout()
+        } else {
+            initDesktopLayout()
         }
-
         appendChild(layout)
-
-
 
         this.buttons = new Hlayout()
         executeButton = new Button(messages.get("execute"))
@@ -125,8 +120,63 @@ class ReportViewer extends Div implements ActionEventBuilder {
         exportButton.zclass = "btn btn-success"
         buttons.appendChild(exportButton)
 
-        layout.south.sclass = "pd10"
+        reloadButton = new Button(messages.get("reload"))
+        reloadButton.iconSclass = "fa fa-refresh"
+        reloadButton.addEventListener(Events.ON_CLICK, { reload() })
+        reloadButton.zclass = "btn btn-danger"
+        buttons.appendChild(reloadButton)
         layout.south.appendChild(buttons)
+    }
+
+    def initMobileLayout() {
+        Tabbox content = new Tabbox()
+        layout.center.children.clear()
+        layout.center.appendChild(content)
+        content.with {
+            appendChild(new Tabs())
+            appendChild(new Tabpanels())
+            vflex = "1"
+            hflex = "1"
+        }
+
+        if (report.filters) {
+            content.tabs.appendChild(new Tab(messages.get("filters")))
+            filtersContainer = new Tabpanel()
+            content.tabpanels.appendChild(filtersContainer)
+        }
+
+        content.tabs.appendChild(new Tab(messages.get("result")))
+        dataViewContainer = new Tabpanel()
+        content.tabpanels.appendChild(dataViewContainer)
+
+        if (report.chartable) {
+            content.tabs.appendChild(new Tab(messages.get("charts")))
+            chartsContainer = new Tabpanel()
+            content.tabpanels.appendChild(chartsContainer)
+        }
+    }
+
+    private void initDesktopLayout() {
+        if (report.filters) {
+            layout.with {
+                appendChild(new West())
+                west.width = "15%"
+                west.collapsible = true
+                west.splittable = true
+                west.title = messages.get("filters")
+            }
+            filtersContainer = layout.west
+        }
+
+        if (report.chartable) {
+            layout.with {
+                appendChild(new East())
+                east.width = "40%"
+                east.splittable = true
+                east.autoscroll = true
+            }
+            chartsContainer = layout.east
+        }
     }
 
     def initFiltersPanel() {
@@ -135,9 +185,9 @@ class ReportViewer extends Div implements ActionEventBuilder {
             def descriptor = new DefaultViewDescriptor()
             report.filters.each { filter ->
                 Field field = new Field(filter.name, filter.dataType.typeClass)
-
                 field.propertyInfo = new PropertyInfo(field.name, field.fieldClass, Report, AccessMode.READ_WRITE)
                 field.label = filter.label
+                field.required = filter.required
                 field.addParam("condition", FilterCondition.EQUALS.name())
 
                 if (filter.dataType == DataType.ENUM && filter.enumClassName != null) {
@@ -153,12 +203,9 @@ class ReportViewer extends Div implements ActionEventBuilder {
                 } else if (filter.dataType == DataType.ENTITY && filter.entityClassName != null) {
                     field.fieldClass = Class.forName(filter.entityClassName)
                     field.propertyInfo = new PropertyInfo(field.name, field.fieldClass, Report, AccessMode.READ_WRITE)
-                }
-
-                if (filter.queryValues != null && !filter.queryValues.empty) {
+                } else if (filter.queryValues != null && !filter.queryValues.empty) {
                     List<ReportFilterOption> options = filter.loadOptions(dataSource)
                     field.component = "combobox"
-                    field.required = filter.required
                     field.addParam("readonly", true)
                     field.addParam("model", new ValueWrapper(new ListModelList(options), ListModel))
                     field.addParam("itemRenderer", new ValueWrapper(new ReportFilterOptionItemRenderer(), ComboitemRenderer))
@@ -169,12 +216,8 @@ class ReportViewer extends Div implements ActionEventBuilder {
             filtersPanel = new EntityFiltersPanel(Report)
             filtersPanel.viewDescriptor = descriptor
             filtersPanel.addEventListener(EntityFiltersPanel.ON_SEARCH, { execute() })
-
-
-            layout.east.appendChild(filtersPanel)
-
-        } else {
-            layout.east.detach()
+            filtersContainer.appendChild(filtersPanel)
+            filtersPanel.south.detach()
         }
     }
 
@@ -188,10 +231,9 @@ class ReportViewer extends Div implements ActionEventBuilder {
             hflex = "1"
             mold = "paging"
             sizedByContent = true
-
         }
 
-
+        addColumnNumber()
 
         if (!report.autofields) {
 
@@ -206,7 +248,7 @@ class ReportViewer extends Div implements ActionEventBuilder {
             }
         }
 
-        layout.center.appendChild(dataView)
+        dataViewContainer.appendChild(dataView)
 
     }
 
@@ -309,9 +351,16 @@ class ReportViewer extends Div implements ActionEventBuilder {
 
         dataView.items.clear()
         def totals = [:]
+        def count = 0
         reportData.entries.each { data ->
             def row = new Listitem()
             dataView.appendChild(row)
+
+            count++
+            def cellCount = new Listcell(count.toString())
+            cellCount.sclass = "grey lighten-2"
+            cellCount.setStyle("font-weight: bold")
+            cellCount.setParent(row)
 
             fieldsNames.each { String fieldName ->
                 Object cellData = data.values[fieldName]
@@ -333,7 +382,8 @@ class ReportViewer extends Div implements ActionEventBuilder {
                 }
 
                 def cell = new Listcell()
-                cell.attributes["data"] = cellData
+                cell.attributes["result"] = cellData
+
                 def cellValue = new Label()
 
                 ReportField reportField = report.findField(fieldName)
@@ -343,7 +393,7 @@ class ReportViewer extends Div implements ActionEventBuilder {
                             cellData = new CurrencySimple().coerceToUi(cellData, cellValue)
                             break
                     }
-                    cell.style = reportField.cellStyle
+                    cell.sclass = reportField.cellStyle
                     cellData = reportField.upperCase ? cellData?.toString()?.toUpperCase() : cellData
                 }
 
@@ -391,12 +441,12 @@ class ReportViewer extends Div implements ActionEventBuilder {
     }
 
     def updateChartView() {
-        if (report.chartable && report.charts && layout.west) {
-            layout.west.children.clear()
+        if (report.chartable && report.charts && chartsContainer) {
+            chartsContainer.children.clear()
             currentCharts = []
 
             def chartLayout = new Vlayout()
-            layout.west.appendChild(chartLayout)
+            chartsContainer.appendChild(chartLayout)
 
             report.charts.each { c ->
                 def data = new CategoryChartjsData()
@@ -439,6 +489,9 @@ class ReportViewer extends Div implements ActionEventBuilder {
     private void buildAutoColumns() {
         dataView.listhead.children.clear()
         dataView.listfoot.children.clear()
+
+        addColumnNumber()
+
         reportData.fieldNames.each { fieldName ->
 
             Listheader col = new Listheader(StringUtils.addSpaceBetweenWords(StringUtils.capitalizeAllWords(fieldName)))
@@ -459,13 +512,22 @@ class ReportViewer extends Div implements ActionEventBuilder {
         }
     }
 
+    private void addColumnNumber() {
+        Listheader colNum = new Listheader("N.")
+        colNum.sclass = "grey color-white"
+        dataView.listhead.appendChild(colNum)
+
+        Listfooter footNum = new Listfooter()
+        dataView.listfoot.appendChild(footNum)
+    }
+
     private void setupColumn(ReportField reportField, Listheader col) {
         col.attributes["reportField"] = reportField
         col.attributes["reportFieldName"] = reportField.name
         col.align = reportField.align.name()
         col.label = reportField.label
-        col.style = reportField.columnStyle
         col.width = reportField.width
+        col.sclass = reportField.columnStyle
 
 
         col.addEventListener(Events.ON_SORT, { SortEvent evt ->
@@ -481,6 +543,10 @@ class ReportViewer extends Div implements ActionEventBuilder {
 
     Button getExportButton() {
         return exportButton
+    }
+
+    Button getReloadButton() {
+        return reloadButton
     }
 
     Report getReport() {

@@ -9,9 +9,11 @@ import tools.dynamia.crud.CrudActionEvent
 import tools.dynamia.crud.CrudState
 import tools.dynamia.integration.Containers
 import tools.dynamia.navigation.NavigationManager
+import tools.dynamia.reports.core.ReportsUtils
 import tools.dynamia.reports.core.domain.Report
 import tools.dynamia.reports.core.services.ReportsService
 import tools.dynamia.reports.core.services.impl.ReportDataSource
+import tools.dynamia.reports.ui.ReportPage
 import tools.dynamia.reports.ui.ReportViewer
 import tools.dynamia.ui.UIMessages
 import tools.dynamia.zk.navigation.ComponentPage
@@ -47,35 +49,6 @@ class ViewReportAction extends AbstractCrudAction {
     }
 
     void view(Report report, boolean reloable) {
-        def datasource = findDatasource(report)
-
-
-        def viewer = new ReportViewer(service, report, datasource)
-        if (reloable) {
-            viewer.addAction(new FastAction(Messages.get(ViewReportAction, "reload"), {
-                viewer.reload()
-                UIMessages.showMessage("Reloaded")
-            }))
-            viewer.renderActions()
-        }
-        viewer.execute()
-        def title = Messages.get(ViewReportAction, "pageTitle")
-        def page = new ComponentPage("report$report.id", "${title}: $report.name", viewer)
-        page.alwaysAllowed = true
-
-
-        NavigationManager.getCurrent().currentPage = page
+        NavigationManager.getCurrent().currentPage = new ReportPage(report)
     }
-
-    ReportDataSource findDatasource(Report report) {
-        if (report.queryLang == "sql") {
-            DataSource dataSource = Containers.get().findObject(DataSource.class)
-            return new ReportDataSource("Database", dataSource)
-        } else {
-            EntityManagerFactory em = Containers.get().findObject(EntityManagerFactory.class)
-            return new ReportDataSource("EntityManager", em)
-        }
-
-    }
-
 }
