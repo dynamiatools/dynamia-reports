@@ -12,10 +12,10 @@
 
 
     <properties>
-       <dynamiatools.version>3.2.0.Final</dynamiatools.version>
+       <dynamiatools.version>3.5.0.Final</dynamiatools.version>
         <saas.version>2.1.0</saas.version>
         <java.version>1.8</java.version>
-        <groovy.version>2.5.4</groovy.version>
+        <groovy.version>2.5.5</groovy.version>
         <maven.compiler>3.8.0</maven.compiler>
         <source.encoding>UTF-8</source.encoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
