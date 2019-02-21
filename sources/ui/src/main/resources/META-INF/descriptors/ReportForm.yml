@@ -22,10 +22,7 @@ fields:
     params:
       mode: sql
       span: 4
-      height: 400px
-
-
-
+      height: '400px !important'
 
   filters:
     component: crudview
