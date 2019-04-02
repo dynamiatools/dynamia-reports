@@ -3,7 +3,7 @@ package tools.dynamia.reports.core.domain.enums
 enum DataType {
 
 
-    TEXT(String), DATE(Date), NUMBER(Long), CURRENCY(BigDecimal), ENUM(Enum), ENTITY(Object)
+    TEXT(String), DATE(Date), NUMBER(Long), CURRENCY(BigDecimal), ENUM(Enum), ENTITY(Object), BOOLEAN(Boolean)
 
     private Class typeClass
 

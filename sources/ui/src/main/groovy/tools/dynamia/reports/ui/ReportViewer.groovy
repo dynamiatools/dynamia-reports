@@ -209,6 +209,8 @@ class ReportViewer extends Div implements ActionEventBuilder {
                     field.addParam("readonly", true)
                     field.addParam("model", new ValueWrapper(new ListModelList(options), ListModel))
                     field.addParam("itemRenderer", new ValueWrapper(new ReportFilterOptionItemRenderer(), ComboitemRenderer))
+                }else if(filter.dataType==DataType.BOOLEAN){
+                    field.component = "booleanbox"
                 }
                 descriptor.addField(field)
             }
