@@ -11,6 +11,7 @@
     <name>DynamiaReports</name>
     <description>DynamiaTools extension for build in app reports with queries and charts</description>
     <inceptionYear>2018</inceptionYear>
+    <url>https://www.dynamia.tools/reports</url>
 
     <organization>
         <name>Dynamia Soluciones IT SAS</name>
