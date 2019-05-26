@@ -1,20 +1,9 @@
-/*
- * Copyright (C) 2009 - 2018 - Dynamia Soluciones IT SAS (NIT 900302344-1).
- *
- * Licenciado bajo la licencia de código propietario de software de Dynamia Soluciones IT. Prohibida la copia
- * o distribución de este archivo de forma parcial o completa sin autorización previa de los autores.
- * Si desea conocer los detalles de esta licencia ingrese al sitio web:
- *
- * http://www.dynamiasoluciones.com/licencia
- *
- * Todos los derechos reservados
- */
+
 
 package tools.dynamia.reports.core.domain
 
 import tools.dynamia.domain.Descriptor
 import tools.dynamia.domain.contraints.NotEmpty
-import tools.dynamia.modules.saas.api.SimpleEntitySaaS
 import tools.dynamia.modules.saas.jpa.SimpleEntitySaaS
 
 import javax.persistence.Column

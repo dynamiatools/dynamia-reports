@@ -8,18 +8,41 @@
     <groupId>tools.dynamia.reports</groupId>
     <artifactId>tools.dynamia.reports.parent</artifactId>
     <version>1.0.0</version>
-    <name>DynamiaReports (${project.version})</name>
+    <name>DynamiaReports</name>
+    <description>DynamiaTools extension for build in app reports with queries and charts</description>
+    <inceptionYear>2018</inceptionYear>
 
+    <organization>
+        <name>Dynamia Soluciones IT SAS</name>
+        <url>http://www.dynamiasoluciones.com</url>
+    </organization>
+
+    <developers>
+        <developer>
+            <name>Mario Serrano Leones</name>
+            <email>mario@dynamiasoluciones.com</email>
+            <organization>Dynamia Soluciones IT</organization>
+            <organizationUrl>https://www.dynamiasoluciones.com</organizationUrl>
+        </developer>
+    </developers>
 
     <properties>
-       <dynamiatools.version>3.5.0.Final</dynamiatools.version>
-        <saas.version>2.1.0</saas.version>
+       <dynamiatools.version>3.6.0.Final</dynamiatools.version>
+        <saas.version>2.3.0</saas.version>
         <java.version>1.8</java.version>
-        <groovy.version>2.5.6</groovy.version>
+        <groovy.version>2.5.7</groovy.version>
         <maven.compiler>3.8.0</maven.compiler>
         <source.encoding>UTF-8</source.encoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License (LGPL v3)</name>
+            <url>https://www.gnu.org/licenses/lgpl-3.0.en.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <modules>
         <module>api</module>
@@ -58,7 +81,7 @@
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.6.1</version>
+                <version>1.6.3</version>
                 <executions>
                     <execution>
                         <goals>
@@ -77,15 +100,74 @@
                     <invokeDynamic>true</invokeDynamic>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.8</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>1.20</version>
+                <configuration>
+                    <verbose>false</verbose>
+                    <licenseName>lgpl_v3</licenseName>
+                    <roots>
+                        <root>src/main/java</root>
+                        <root>src/main/groovy</root>
+                        <root>src/test</root>
+                    </roots>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
     <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
         <repository>
-            <id>nexus</id>
-            <url>http://nexus.dynamiaweb.com/repository/releases/</url>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
+
+    <profiles>
+        <profile>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 
 </project>

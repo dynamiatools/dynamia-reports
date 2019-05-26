@@ -10,7 +10,7 @@
         <version>1.0.0</version>
     </parent>
 
-    <name>DynamiaReports - API (${project.version})</name>
+    <name>DynamiaReports - API</name>
     <artifactId>tools.dynamia.reports.api</artifactId>
     <version>1.0.0</version>
 

@@ -11,7 +11,7 @@
     </parent>
 
 
-    <name>DynamiaReports - UI (${project.version})</name>
+    <name>DynamiaReports - UI</name>
     <artifactId>tools.dynamia.reports.ui</artifactId>
     <version>1.0.0</version>
 
