@@ -27,6 +27,9 @@ import tools.dynamia.navigation.Page
 import tools.dynamia.reports.core.domain.Report
 import tools.dynamia.reports.core.domain.ReportGroup
 
+/**
+ * Helper module to configure DynamiaReports very easy
+ */
 class DynamiaReportsModule extends Module {
 
 

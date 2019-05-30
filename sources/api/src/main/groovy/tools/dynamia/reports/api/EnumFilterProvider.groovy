@@ -21,6 +21,10 @@
  */
 package tools.dynamia.reports.api
 
+/**
+ * API to provide new Enum filters
+ * @param <T>
+ */
 interface EnumFilterProvider<T extends Enum> {
 
     /**

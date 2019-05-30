@@ -7,7 +7,7 @@
     <packaging>pom</packaging>
     <groupId>tools.dynamia.reports</groupId>
     <artifactId>tools.dynamia.reports.parent</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <name>DynamiaReports</name>
     <description>DynamiaTools extension for build in app reports with queries and charts</description>
     <inceptionYear>2018</inceptionYear>
@@ -27,8 +27,12 @@
         </developer>
     </developers>
 
+    <scm>
+        <url>https://github.com/dynamia-projects/dynamia-reports</url>
+    </scm>
+
     <properties>
-       <dynamiatools.version>3.6.0.Final</dynamiatools.version>
+        <dynamiatools.version>3.6.1.Final</dynamiatools.version>
         <saas.version>2.3.0</saas.version>
         <java.version>1.8</java.version>
         <groovy.version>2.5.7</groovy.version>
@@ -54,9 +58,9 @@
     <dependencies>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy</artifactId>
+            <artifactId>groovy-all</artifactId>
             <version>${groovy.version}</version>
-            <scope>provided</scope>
+            <type>pom</type>
         </dependency>
     </dependencies>
 
@@ -82,7 +86,7 @@
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.6.3</version>
+                <version>1.7.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -94,12 +98,23 @@
                             <goal>compileTests</goal>
                             <goal>removeStubs</goal>
                             <goal>removeTestStubs</goal>
+                            <goal>groovydoc</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
                     <invokeDynamic>true</invokeDynamic>
+                    <docTitle>Dynamia Reports</docTitle>
+                    <windowTitle>Dynamia Reports</windowTitle>
+                    <footer>Powered By DynamiaTools</footer>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy</artifactId>
+                        <version>${groovy.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>

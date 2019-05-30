@@ -59,6 +59,8 @@ class Report extends SimpleEntitySaaS {
     boolean autofields = true
     boolean active = true
     boolean chartable
+    String title
+    boolean exportWithoutFormat
 
 
     static List<Report> findActivesByGroup(ReportGroup reportGroup) {

@@ -43,7 +43,7 @@ import javax.sql.DataSource
 import java.sql.Connection
 
 @Service
-class ReportsServiceImp extends AbstractService implements ReportsService {
+class ReportsServiceImpl extends AbstractService implements ReportsService {
 
     @Autowired
     private AccountServiceAPI accountServiceAPI

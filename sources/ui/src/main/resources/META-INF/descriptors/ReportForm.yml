@@ -12,11 +12,15 @@ fields:
       entityAlias: Account
       forceVisible: true
   description:
+  title:
+    params:
+      span: 4
   queryLang:
     visible: false
   chartable:
   autofields:
   active:
+  exportWithoutFormat:
   queryScript:
     component: aceditor
     params:

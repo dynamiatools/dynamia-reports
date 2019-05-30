@@ -31,7 +31,6 @@ import tools.dynamia.reports.core.domain.ReportField
 import tools.dynamia.reports.core.domain.enums.DataType
 import tools.dynamia.reports.core.services.ReportsService
 import tools.dynamia.reports.core.services.impl.ReportDataSource
-import tools.dynamia.reports.excel.ExcelFileWriter
 import tools.dynamia.ui.MessageType
 import tools.dynamia.ui.UIMessages
 import tools.dynamia.viewers.Field
@@ -62,6 +61,7 @@ class ReportViewer extends Div implements ActionEventBuilder {
     private Component filtersContainer
     private Component dataViewContainer
     private Component chartsContainer
+    private ReportFilters filters
 
     ReportViewer(ReportsService service, Report report, ReportDataSource dataSource) {
         this.service = service
@@ -160,7 +160,7 @@ class ReportViewer extends Div implements ActionEventBuilder {
         if (report.filters) {
             layout.with {
                 appendChild(new West())
-                west.width = "15%"
+                west.width = "20%"
                 west.collapsible = true
                 west.splittable = true
                 west.title = messages.get("filters")
@@ -192,28 +192,6 @@ class ReportViewer extends Div implements ActionEventBuilder {
 
                 if (filter.dataType == DataType.ENUM && filter.enumClassName != null) {
                     EnumFilterProvider provider = ReportsUtils.findEnumFilterProvider(filter.enumClassName);
-
-/*-
- * #%L
- * DynamiaReports - UI
- * %%
- * Copyright (C) 2018 - 2019 Dynamia Soluciones IT SAS
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/lgpl-3.0.html>.
- * #L%
- */
                     if (provider != null) {
                         field.fieldClass = Class.forName(filter.enumClassName)
                         field.propertyInfo = new PropertyInfo(field.name, field.fieldClass, Report, AccessMode.READ_WRITE)
@@ -231,7 +209,7 @@ class ReportViewer extends Div implements ActionEventBuilder {
                     field.addParam("readonly", true)
                     field.addParam("model", new ValueWrapper(new ListModelList(options), ListModel))
                     field.addParam("itemRenderer", new ValueWrapper(new ReportFilterOptionItemRenderer(), ComboitemRenderer))
-                }else if(filter.dataType==DataType.BOOLEAN){
+                } else if (filter.dataType == DataType.BOOLEAN) {
                     field.component = "booleanbox"
                 }
                 descriptor.addField(field)
@@ -284,7 +262,7 @@ class ReportViewer extends Div implements ActionEventBuilder {
 
     def execute() {
         try {
-            def filters = new ReportFilters()
+            this.filters = new ReportFilters()
 
             if (filtersPanel != null) {
                 QueryParameters params = filtersPanel.queryParameters
@@ -338,34 +316,10 @@ class ReportViewer extends Div implements ActionEventBuilder {
     }
 
     def export() {
-        if (reportData != null) {
-            def file = File.createTempFile(report.name.replace(" ", "_") + "_", ".xlsx")
-            def exporter = new ExcelFileWriter(file)
-            //columns
-            if (report.autofields) {
-                reportData.fieldNames.each { f ->
-                    ReportField reportField = report.fields.find { it.name == f }
-                    if (reportField != null) {
-                        exporter.addCell(reportField.label)
-                    } else {
-                        exporter.addCell(StringUtils.capitalizeAllWords(StringUtils.addSpaceBetweenWords(f)))
-                    }
-                }
-            } else {
-                report.fields.toSorted { a, b -> a.order <=> b.order }.each { f ->
-                    exporter.addCell(f.label)
-                }
-            }
-            reportData.entries.each { data ->
-                exporter.newRow()
-                reportData.fieldNames.each { f ->
-                    exporter.addCell(data.values[f])
-                }
-            }
-            exporter.write()
-            exporter.close()
-
-            Filedownload.save(file, "application/excel")
+        if (report.exportWithoutFormat) {
+            new ExcelReportDataExporter(report).export(reportData)
+        } else {
+            new ExcelFormattedReportDataExporter(report, filters).export(reportData)
         }
     }
 
@@ -501,7 +455,6 @@ class ReportViewer extends Div implements ActionEventBuilder {
                 chart.data = data
                 chart.title = c.title
                 currentCharts << chart
-
 
 
                 chartLayout.appendChild(chart)

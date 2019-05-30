@@ -20,7 +20,9 @@
  * #L%
  */
 package tools.dynamia.reports.api
-
+/**
+ * API to provide new Entity filters
+ */
 interface EntityFilterProvider {
 
     /**
