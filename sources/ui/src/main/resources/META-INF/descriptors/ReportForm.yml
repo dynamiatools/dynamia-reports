@@ -14,7 +14,10 @@ fields:
   description:
   title:
     params:
-      span: 4
+      span: 2
+  subtitle:
+    params:
+      span: 2
   queryLang:
     visible: false
   chartable:

@@ -53,7 +53,7 @@ class ExcelFormattedReportDataExporter implements ReportDataExporter {
             def file = File.createTempFile(report.name.replace(" ", "_") + "_", ".xlsx")
             this.workbook = new SXSSFWorkbook(500);
             sheet = workbook.createSheet(report.name);
-            sheet.createFreezePane(0,5)
+            sheet.createFreezePane(0, 5)
             exportTitle()
             exportFilters()
             exportColumns(reportData)
@@ -89,8 +89,18 @@ class ExcelFormattedReportDataExporter implements ReportDataExporter {
         if (title == null) {
             title = globalParams["DEFAULT_REPORT_TITLE"]
         }
-
         cell.cellValue = parse(title)
+        cell.cellStyle = style
+
+        String subtitle = report.subtitle
+        if (subtitle == null) {
+            subtitle = globalParams["DEFAULT_REPORT_SUBTITLE"]
+        }
+
+        row = sheet.createRow(2)
+        cell = row.createCell(0)
+        cell.cellType = CellType.STRING
+        cell.cellValue = parse(subtitle)
         cell.cellStyle = style
     }
 
@@ -117,9 +127,10 @@ class ExcelFormattedReportDataExporter implements ReportDataExporter {
         style.font = font
 
         int lastCell = 0
-        def row = sheet.createRow(2)
-        filters.values.each { name, value ->
-            ReportFilter filter = filters.getFilter(name)
+        def row = sheet.createRow(3)
+
+        report.filters.each { filter ->
+            def value = filters.getValue(filter.name)
             if (filter != null && value != null) {
                 String filterValue = formatFilterValue(filter, value)
                 if (filterValue != null) {
@@ -160,7 +171,7 @@ class ExcelFormattedReportDataExporter implements ReportDataExporter {
     }
 
     private List<ReportDataEntry> exportRows(ReportData reportData) {
-        int rowNum = 5
+        int rowNum = 6
 
         def currencyStyle = workbook.createCellStyle()
         currencyStyle.alignment = HorizontalAlignment.RIGHT
