@@ -33,7 +33,7 @@
 
     <properties>
         <dynamiatools.version>3.6.1.Final</dynamiatools.version>
-        <saas.version>2.3.0</saas.version>
+        <saas.version>2.4.0</saas.version>
         <java.version>11</java.version>
         <groovy.version>2.5.7</groovy.version>
         <maven.compiler>3.8.0</maven.compiler>
