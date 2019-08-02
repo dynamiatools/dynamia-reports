@@ -32,7 +32,7 @@
     </scm>
 
     <properties>
-        <dynamiatools.version>3.6.1.Final</dynamiatools.version>
+        <dynamiatools.version>4.0.0.Beta</dynamiatools.version>
         <saas.version>2.4.0</saas.version>
         <java.version>11</java.version>
         <groovy.version>2.5.7</groovy.version>
