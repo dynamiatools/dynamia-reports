@@ -30,6 +30,8 @@ import tools.dynamia.reports.core.domain.enums.DataType
 import tools.dynamia.reports.core.domain.enums.TextAlign
 import tools.dynamia.templates.VelocityTemplateEngine
 
+import java.time.temporal.Temporal
+
 class ExcelFormattedReportDataExporter implements ReportDataExporter {
 
     public static final String DATE_PATTERN = "yyyy-MM-dd"
@@ -171,7 +173,7 @@ class ExcelFormattedReportDataExporter implements ReportDataExporter {
     }
 
     private List<ReportDataEntry> exportRows(ReportData reportData) {
-        int rowNum = 6
+        int rowNum = 5
 
         def currencyStyle = workbook.createCellStyle()
         currencyStyle.alignment = HorizontalAlignment.RIGHT
@@ -179,6 +181,9 @@ class ExcelFormattedReportDataExporter implements ReportDataExporter {
 
         def dateStyle = workbook.createCellStyle()
         dateStyle.dataFormat = workbook.createDataFormat().getFormat("yyyy-mm-dd")
+
+        def centerStyle = workbook.createCellStyle()
+        centerStyle.alignment = HorizontalAlignment.CENTER
 
 
         reportData.entries.each { data ->
@@ -211,6 +216,11 @@ class ExcelFormattedReportDataExporter implements ReportDataExporter {
                     }
                     cell.cellStyle = currencyStyle
                 }
+
+                if (reportField?.align == TextAlign.CENTER) {
+                    cell.cellStyle = centerStyle
+                }
+
             }
         }
     }
