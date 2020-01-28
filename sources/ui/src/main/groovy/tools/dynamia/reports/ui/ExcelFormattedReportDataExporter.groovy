@@ -1,19 +1,12 @@
 package tools.dynamia.reports.ui
 
-import org.apache.poi.sl.usermodel.ColorStyle
+
 import org.apache.poi.ss.usermodel.BuiltinFormats
 import org.apache.poi.ss.usermodel.CellType
-import org.apache.poi.ss.usermodel.FillPatternType
 import org.apache.poi.ss.usermodel.HorizontalAlignment
-import org.apache.poi.ss.usermodel.IndexedColors
-import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.xssf.streaming.SXSSFRow
 import org.apache.poi.xssf.streaming.SXSSFSheet
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
-import org.apache.poi.xssf.usermodel.XSSFRow
-import org.apache.poi.xssf.usermodel.XSSFSheet
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import org.apache.poi.xssf.usermodel.XSSFWorkbookFactory
 import org.zkoss.zul.Filedownload
 import tools.dynamia.commons.DateTimeUtils
 import tools.dynamia.commons.StringUtils
@@ -29,8 +22,6 @@ import tools.dynamia.reports.core.domain.ReportFilter
 import tools.dynamia.reports.core.domain.enums.DataType
 import tools.dynamia.reports.core.domain.enums.TextAlign
 import tools.dynamia.templates.VelocityTemplateEngine
-
-import java.time.temporal.Temporal
 
 class ExcelFormattedReportDataExporter implements ReportDataExporter {
 
@@ -53,7 +44,9 @@ class ExcelFormattedReportDataExporter implements ReportDataExporter {
         if (reportData != null) {
 
             def file = File.createTempFile(report.name.replace(" ", "_") + "_", ".xlsx")
-            this.workbook = new SXSSFWorkbook(500);
+            this.workbook = new SXSSFWorkbook(200);
+            workbook.setCompressTempFiles(true);
+
             sheet = workbook.createSheet(report.name);
             sheet.createFreezePane(0, 5)
             exportTitle()

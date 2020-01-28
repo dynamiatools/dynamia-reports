@@ -51,6 +51,8 @@ class ReportsServiceImpl extends AbstractService implements ReportsService {
 
     @Override
     ReportData execute(Report report, ReportFilters filters, ReportDataSource datasource) {
+        log("Executing query for report: $report.name - $report.queryLang")
+        long start = System.currentTimeMillis()
         ReportData data = null
         loadDefaultFilters(report, filters)
         switch (report.queryLang) {
@@ -61,7 +63,8 @@ class ReportsServiceImpl extends AbstractService implements ReportsService {
                 data = executeJPQL(report, filters, datasource)
                 break
         }
-
+        long end = System.currentTimeMillis()
+        log("Report $report.name executed in ${end - start}ms")
         return data
     }
 

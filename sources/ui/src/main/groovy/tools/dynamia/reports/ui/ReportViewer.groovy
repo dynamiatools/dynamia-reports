@@ -270,22 +270,29 @@ class ReportViewer extends Div implements ActionEventBuilder {
                 params.each { k, v -> filters.add(report.findFilter(k), getFilterValue(v)) }
             }
 
+
             this.reportData = service.execute(report, filters, dataSource)
             if (reportData.empty) {
                 UIMessages.showMessage(messages.get("noresult"), MessageType.WARNING)
             } else {
                 UIMessages.showMessage("$reportData.size ${messages.get("results")}")
             }
-            if (report.autofields) {
-                buildAutoColumns()
+            if (reportData.size > 1000) {
+                UIMessages.showQuestion("El resultado de la consulta es muy grande ($reportData.size) para visualizarse. Desea exportarlo a excel?",{
+                    export()
+                })
+            } else {
+                if (report.autofields) {
+                    buildAutoColumns()
+                }
+                updateDataView()
             }
-            updateDataView()
         } catch (ValidationError e) {
             UIMessages.showMessage(e.message, MessageType.ERROR)
         } catch (Exception e) {
-            if (e.message.contains("execution was interrupted")) {
+            if (e.message.contains("interrupted")) {
                 Messagebox.show("La consulta demora mucho tiempo en procesarse, por favor utilice otros filtros" +
-                        " o intente mas tarde. Por ejemplo, si esta usando un rango de fechas reduzca el valor", "Imposible Continuar",
+                        " o intente mas tarde. Por ejemplo, si esta usando un rango de fechas reduzca la diferencia.", "Error al Consultar",
                         Messagebox.OK, Messagebox.ERROR)
             } else {
                 Messagebox.show(e.message)
