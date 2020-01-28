@@ -283,8 +283,14 @@ class ReportViewer extends Div implements ActionEventBuilder {
         } catch (ValidationError e) {
             UIMessages.showMessage(e.message, MessageType.ERROR)
         } catch (Exception e) {
-            Messagebox.show(e.message)
-            e.printStackTrace()
+            if (e.message.contains("execution was interrupted")) {
+                Messagebox.show("La consulta demora mucho tiempo en procesarse, por favor utilice otros filtros" +
+                        " o intente mas tarde. Por ejemplo, si esta usando un rango de fechas reduzca el valor", "Imposible Continuar",
+                        Messagebox.OK, Messagebox.ERROR)
+            } else {
+                Messagebox.show(e.message)
+                e.printStackTrace()
+            }
         }
 
     }
@@ -368,7 +374,9 @@ class ReportViewer extends Div implements ActionEventBuilder {
                 if (reportField != null) {
                     switch (reportField.dataType) {
                         case DataType.CURRENCY:
-                            cellData = new CurrencySimple().coerceToUi(cellData, cellValue)
+                            if (cellData instanceof Number) {
+                                cellData = new CurrencySimple().format(cellData)
+                            }
                             break
                     }
                     cell.sclass = reportField.cellStyle
@@ -394,13 +402,13 @@ class ReportViewer extends Div implements ActionEventBuilder {
                     if (reportField != null) {
                         switch (reportField.dataType) {
                             case DataType.CURRENCY:
-                                footerValue = new CurrencySimple().coerceToUi(footerValue, footer)
+                                footerValue = new CurrencySimple().format(footerValue)
                                 break
                             case DataType.NUMBER:
                                 if (footerValue instanceof Double) {
-                                    footerValue = new Decimal().coerceToUi(footerValue, footer)
+                                    footerValue = new Decimal().format(footerValue)
                                 } else {
-                                    footerValue = new Integer().coerceToUi(footerValue, footer)
+                                    footerValue = new Integer().format(footerValue)
                                 }
                         }
                         footer.style = reportField.cellStyle

@@ -61,7 +61,7 @@ class Report extends SimpleEntitySaaS {
     boolean chartable
     String title
     String subtitle
-    Boolean exportWithoutFormat
+    Boolean exportWithoutFormat = false
 
 
     static List<Report> findActivesByGroup(ReportGroup reportGroup) {
