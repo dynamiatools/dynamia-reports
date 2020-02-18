@@ -27,15 +27,16 @@ import tools.dynamia.domain.query.QueryParameters
 import tools.dynamia.domain.util.DomainUtils
 import tools.dynamia.integration.Containers
 import tools.dynamia.modules.saas.api.AccountServiceAPI
-import tools.dynamia.modules.saas.api.SimpleEntitySaaS
 import tools.dynamia.modules.saas.jpa.SimpleEntitySaaS
 
+import javax.persistence.Cacheable
 import javax.persistence.Entity
 import javax.persistence.Table
 
 @Entity
 @Table(name = "rpt_groups")
 @Descriptor(fields = ["name", "module", "active"])
+@Cacheable
 class ReportGroup extends SimpleEntitySaaS {
 
     String name
@@ -49,9 +50,9 @@ class ReportGroup extends SimpleEntitySaaS {
 
     static List<ReportGroup> findActives() {
         def accountsApi = Containers.get().findObject(AccountServiceAPI)
-        def accounts = new ArrayList([accountsApi.systemAccountId, accountsApi.currentAccountId])
+
         return DomainUtils.lookupCrudService().find(ReportGroup, QueryParameters.with("active", true)
-                .add("accountId", QueryConditions.in(accounts))
+                .add("accountId", accountsApi.systemAccountId)
                 .orderBy("name"))
     }
 }

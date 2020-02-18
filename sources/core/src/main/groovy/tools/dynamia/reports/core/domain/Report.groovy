@@ -36,6 +36,7 @@ import static tools.dynamia.domain.query.QueryConditions.eq
 
 @Entity
 @Table(name = "rpt_reports")
+@Cacheable
 class Report extends SimpleEntitySaaS {
 
     @OneToOne
@@ -66,10 +67,18 @@ class Report extends SimpleEntitySaaS {
 
     static List<Report> findActivesByGroup(ReportGroup reportGroup) {
         def accountsApi = Containers.get().findObject(AccountServiceAPI)
-        def accounts = new ArrayList([accountsApi.systemAccountId, accountsApi.currentAccountId])
+
 
         return DomainUtils.lookupCrudService().find(Report, QueryParameters.with("group.name", eq(reportGroup.name))
                 .add("active", true)
+                .add("accountId", accountsApi.systemAccountId).orderBy("name"))
+    }
+
+    static List<Report> findActives() {
+        def accountsApi = Containers.get().findObject(AccountServiceAPI)
+        def accounts = new ArrayList([accountsApi.systemAccountId, accountsApi.currentAccountId])
+
+        return DomainUtils.lookupCrudService().find(Report, QueryParameters.with("active", true)
                 .add("accountId", QueryConditions.in(accounts)).orderBy("name"))
     }
 

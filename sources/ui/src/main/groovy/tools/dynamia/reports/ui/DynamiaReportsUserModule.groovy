@@ -23,7 +23,6 @@ package tools.dynamia.reports.ui
 
 import tools.dynamia.navigation.Module
 import tools.dynamia.navigation.PageGroup
-import tools.dynamia.reports.ui.ReportListViewModel
 import tools.dynamia.reports.ui.ReportPage
 
 class DynamiaReportsUserModule extends Module {
