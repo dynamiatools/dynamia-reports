@@ -44,6 +44,7 @@ import tools.dynamia.zk.crud.ui.EntityFiltersPanel
 class ReportViewer extends Div implements ActionEventBuilder {
 
 
+    public static final int MAX_RESULT_TO_DISPLAY = 2000
     private ClassMessages messages = ClassMessages.get(ReportViewer.class)
     private ReportsService service
     private Report report
@@ -277,7 +278,7 @@ class ReportViewer extends Div implements ActionEventBuilder {
             } else {
                 UIMessages.showMessage("$reportData.size ${messages.get("results")}")
             }
-            if (reportData.size > 1000) {
+            if (reportData.size > MAX_RESULT_TO_DISPLAY) {
                 UIMessages.showQuestion("El resultado de la consulta es muy grande ($reportData.size) para visualizarse. Desea exportarlo a excel?",{
                     export()
                 })
