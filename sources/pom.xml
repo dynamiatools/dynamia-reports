@@ -36,6 +36,7 @@
         <saas.version>2.4.0</saas.version>
         <java.version>11</java.version>
         <groovy.version>3.0.4</groovy.version>
+        <groovy.compiler>1.8.1</groovy.compiler>
         <maven.compiler>3.8.1</maven.compiler>
         <source.encoding>UTF-8</source.encoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -86,18 +87,14 @@
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.7.0</version>
+                <version>${groovy.compiler}</version>
                 <executions>
                     <execution>
                         <goals>
                             <goal>addSources</goal>
                             <goal>addTestSources</goal>
-                            <goal>generateStubs</goal>
                             <goal>compile</goal>
-                            <goal>generateTestStubs</goal>
                             <goal>compileTests</goal>
-                            <goal>removeStubs</goal>
-                            <goal>removeTestStubs</goal>
                             <goal>groovydoc</goal>
                         </goals>
                     </execution>
