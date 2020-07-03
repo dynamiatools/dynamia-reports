@@ -59,9 +59,10 @@
     <dependencies>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
+            <artifactId>groovy</artifactId>
             <version>${groovy.version}</version>
-            <type>pom</type>
+
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -100,8 +101,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <invokeDynamic>true</invokeDynamic>
-                    <docTitle>Dynamia Reports</docTitle>
+                    <invokeDynamic>true</invokeDynamic><docTitle>Dynamia Reports</docTitle>
                     <windowTitle>Dynamia Reports</windowTitle>
                     <footer>Powered By DynamiaTools</footer>
                 </configuration>
@@ -110,6 +110,7 @@
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy</artifactId>
                         <version>${groovy.version}</version>
+
                     </dependency>
                 </dependencies>
             </plugin>
