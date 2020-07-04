@@ -105,14 +105,7 @@
                     <windowTitle>Dynamia Reports</windowTitle>
                     <footer>Powered By DynamiaTools</footer>
                 </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.codehaus.groovy</groupId>
-                        <artifactId>groovy</artifactId>
-                        <version>${groovy.version}</version>
 
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
