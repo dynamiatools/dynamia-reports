@@ -27,6 +27,7 @@ import org.zkoss.bind.annotation.Init
 import tools.dynamia.integration.Containers
 import tools.dynamia.navigation.ModuleContainer
 import tools.dynamia.navigation.NavigationRestrictions
+import tools.dynamia.reports.core.Reports
 import tools.dynamia.reports.core.domain.Report
 import tools.dynamia.reports.core.domain.ReportGroup
 import tools.dynamia.reports.ui.actions.ViewReportAction
@@ -42,18 +43,8 @@ class ReportListViewModel {
     }
 
     def loadReports() {
-        reports = new ArrayList<>()
-        ReportGroup.findActives().each { grp ->
-            List<Report> list = Report.findActivesByGroup(grp)
-            if (!list.empty) {
-                Reports currentReports = findReports(grp)
-                if (currentReports == null) {
-                    currentReports = new Reports(group: grp)
-                    reports << currentReports
-                }
-                currentReports.list.addAll(list)
-            }
-        }
+        reports = Reports.loadAll()
+
         filterReportsByModules()
     }
 
@@ -71,9 +62,7 @@ class ReportListViewModel {
         reports.removeAll(toRemove)
     }
 
-    Reports findReports(ReportGroup reportGroup) {
-        return reports.find { it.group.name == reportGroup.name }
-    }
+
 
     @Command
     def viewReport(@BindingParam("report") Report report) {
@@ -82,10 +71,4 @@ class ReportListViewModel {
             action.view(report, false)
         }
     }
-}
-
-class Reports {
-    ReportGroup group
-    List<Report> list = new ArrayList<>()
-
 }

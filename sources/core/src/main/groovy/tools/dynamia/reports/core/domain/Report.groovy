@@ -79,6 +79,7 @@ class Report extends SimpleEntitySaaS {
         def accounts = new ArrayList([accountsApi.systemAccountId, accountsApi.currentAccountId])
 
         return DomainUtils.lookupCrudService().find(Report, QueryParameters.with("active", true)
+                .add("group.active", true)
                 .add("accountId", QueryConditions.in(accounts)).orderBy("name"))
     }
 
