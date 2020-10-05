@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (C)  2020. Dynamia Soluciones IT S.A.S - NIT 900302344-1 All Rights Reserved.
+  ~ Colombia - South America
+  ~
+  ~ This file is free software: you can redistribute it and/or modify it  under the terms of the
+  ~  GNU Lesser General Public License (LGPL v3) as published by the Free Software Foundation,
+  ~   either version 3 of the License, or (at your option) any later version.
+  ~
+  ~  This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+  ~   without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  ~   See the GNU Lesser General Public License for more details. You should have received a copy of the
+  ~   GNU Lesser General Public License along with this file.
+  ~   If not, see <https://www.gnu.org/licenses/>.
+  ~
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -11,7 +27,7 @@
     <name>DynamiaReports</name>
     <description>DynamiaTools extension for build in app reports with queries and charts</description>
     <inceptionYear>2018</inceptionYear>
-    <url>https://www.dynamia.tools/reports</url>
+    <url>https://www.dynamia.tools/modules/reports</url>
 
     <organization>
         <name>Dynamia Soluciones IT SAS</name>
@@ -33,9 +49,9 @@
 
     <properties>
         <dynamiatools.version>4.0.0.RC</dynamiatools.version>
-        <saas.version>2.4.0</saas.version>
+        <saas.version>2.4.1</saas.version>
         <java.version>11</java.version>
-        <groovy.version>3.0.5</groovy.version>
+        <groovy.version>3.0.6</groovy.version>
         <groovy.compiler>1.10.0</groovy.compiler>
         <maven.compiler>3.8.1</maven.compiler>
         <source.encoding>UTF-8</source.encoding>
@@ -101,7 +117,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <invokeDynamic>true</invokeDynamic><docTitle>Dynamia Reports</docTitle>
+                    <invokeDynamic>true</invokeDynamic>
+                    <docTitle>Dynamia Reports</docTitle>
                     <windowTitle>Dynamia Reports</windowTitle>
                     <footer>Powered By DynamiaTools</footer>
                 </configuration>
@@ -131,6 +148,17 @@
                         <root>src/test</root>
                     </roots>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
