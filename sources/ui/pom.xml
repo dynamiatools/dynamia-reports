@@ -23,13 +23,13 @@
     <parent>
         <groupId>tools.dynamia.reports</groupId>
         <artifactId>tools.dynamia.reports.parent</artifactId>
-        <version>1.1.0</version>
+        <version>1.2.0</version>
     </parent>
 
 
     <name>DynamiaReports - UI</name>
     <artifactId>tools.dynamia.reports.ui</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 
     <build>
         <plugins>
@@ -50,7 +50,7 @@
         <dependency>
             <groupId>tools.dynamia.reports</groupId>
             <artifactId>tools.dynamia.reports.core</artifactId>
-            <version>1.1.0</version>
+            <version>1.2.0</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia</groupId>
