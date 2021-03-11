@@ -77,7 +77,6 @@
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy</artifactId>
             <version>${groovy.version}</version>
-
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -112,7 +111,7 @@
                             <goal>addTestSources</goal>
                             <goal>compile</goal>
                             <goal>compileTests</goal>
-                            <goal>groovydoc</goal>
+                            <goal>groovydoc-jar</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -121,8 +120,17 @@
                     <docTitle>Dynamia Reports</docTitle>
                     <windowTitle>Dynamia Reports</windowTitle>
                     <footer>Powered By DynamiaTools</footer>
+                    <includeClasspath>PROJECT_AND_PLUGIN</includeClasspath>
+                    <classifier>javadoc</classifier>
                 </configuration>
-
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-all</artifactId>
+                        <version>${groovy.version}</version>
+                        <type>pom</type>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
