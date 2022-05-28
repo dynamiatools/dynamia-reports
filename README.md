@@ -1,3 +1,6 @@
+[![Maven Central](https://img.shields.io/maven-central/v/tools.dynamia.reports/tools.dynamia.reports.core)](https://search.maven.org/search?q=tools.dynamia.reports)
+![Java Version Required](https://img.shields.io/badge/java-11+-blue)
+
 # DynamiaReports
 
 Is a small reporting framework built using DynamiaTools for generate reports in app storing queries metadata in database and allowing users to run, edit, copy the reports. 
@@ -12,11 +15,10 @@ Is a small reporting framework built using DynamiaTools for generate reports in 
 - View Reports 
 - Embed reports in other apps
 - Integrate as a module with any DynamiaTools modules
+- View reports data as charts
 
 
 ## Future Features
-- Create reports 100% visually
-- View reports data as charts
 - Integrate reports data in HTML templates for advanced reports
 
 ## Architecture
