@@ -7,6 +7,7 @@ fields:
   label:
   condition:
   required:
+
   dataType:
   enumClassName:
     component: providerpickerbox
@@ -20,10 +21,11 @@ fields:
       className: tools.dynamia.reports.api.EntityFilterProvider
       nameField: name
       idField: entityClassName
+  hideLabel:
   defaultValue:
   values:
     params:
-      span: 4
+      span: 3
   queryValues:
     component: aceditor
     params:

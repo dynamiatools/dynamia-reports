@@ -205,6 +205,9 @@ class ReportViewer extends Div implements ActionEventBuilder {
                 field.propertyInfo = new PropertyInfo(field.name, field.fieldClass, Report, AccessMode.READ_WRITE)
                 field.label = filter.label
                 field.required = filter.required
+                if (filter.hideLabel) {
+                    field.set("showLabel", false)
+                }
                 field.addParam("condition", FilterCondition.EQUALS.name())
 
                 if (filter.dataType == DataType.ENUM && filter.enumClassName != null) {
@@ -228,6 +231,10 @@ class ReportViewer extends Div implements ActionEventBuilder {
                     field.addParam("itemRenderer", new ValueWrapper(new ReportFilterOptionItemRenderer(), ComboitemRenderer))
                 } else if (filter.dataType == DataType.BOOLEAN) {
                     field.component = "booleanbox"
+                } else if (filter.dataType == DataType.TIME) {
+                    field.component = "timebox"
+                } else if (filter.dataType == DataType.DATE_TIME) {
+                    field.addParam("format", "dd/MM/yyyy HH:mm")
                 }
                 descriptor.addField(field)
             }
@@ -295,7 +302,7 @@ class ReportViewer extends Div implements ActionEventBuilder {
                 UIMessages.showMessage("$reportData.size ${messages.get("results")}")
             }
             if (reportData.size > MAX_RESULT_TO_DISPLAY) {
-                UIMessages.showQuestion("El resultado de la consulta es muy grande ($reportData.size) para visualizarse. Desea exportarlo a excel?",{
+                UIMessages.showQuestion("El resultado de la consulta es muy grande ($reportData.size) para visualizarse. Desea exportarlo a excel?", {
                     export()
                 })
             } else {
