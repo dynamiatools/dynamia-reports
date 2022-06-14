@@ -48,8 +48,8 @@
     </scm>
 
     <properties>
-        <dynamiatools.version>4.0.9</dynamiatools.version>
-        <saas.version>2.7.3</saas.version>
+        <dynamiatools.version>4.1.0</dynamiatools.version>
+        <saas.version>2.8.0</saas.version>
         <java.version>11</java.version>
         <groovylang.version>4.0.3</groovylang.version>
         <groovy.compiler>1.13.1</groovy.compiler>
