@@ -33,7 +33,7 @@ import tools.dynamia.commons.ValueWrapper
 import tools.dynamia.commons.reflect.AccessMode
 import tools.dynamia.commons.reflect.PropertyInfo
 import tools.dynamia.crud.FilterCondition
-import tools.dynamia.domain.Identifiable
+import tools.dynamia.commons.Identifiable
 import tools.dynamia.domain.ValidationError
 import tools.dynamia.domain.query.QueryCondition
 import tools.dynamia.domain.query.QueryParameters
