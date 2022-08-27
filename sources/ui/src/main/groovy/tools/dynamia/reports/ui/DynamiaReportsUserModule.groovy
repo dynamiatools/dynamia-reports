@@ -47,12 +47,10 @@ class DynamiaReportsUserModule extends Module {
         vm.init()
 
         vm.reports.each { rg ->
-            printf "Loading report group $rg.group.name"
             def pageGroup = new PageGroup("group$rg.group.id", rg.group.name)
             addPageGroup(pageGroup)
 
             rg.list.each { report ->
-                printf "   Loading report $report.name"
                 pageGroup.addPage(new ReportPage(report))
 
             }
