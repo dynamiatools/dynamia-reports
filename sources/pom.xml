@@ -76,7 +76,7 @@
         <dependency>
             <groupId>org.apache.groovy</groupId>
             <artifactId>groovy</artifactId>
-            <version>4.0.2</version>
+            <version>${groovylang.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
