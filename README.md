@@ -40,7 +40,7 @@ Additional module for  create and connect to external datasources. Mainly SQL da
 ### Boot module
 A spring boot application to run DynamiaReports as a standalone app.
 
-#License
+# License
 Opensource project using Apache 2.0 license
 
 
