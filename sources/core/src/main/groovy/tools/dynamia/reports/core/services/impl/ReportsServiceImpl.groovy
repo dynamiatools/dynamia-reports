@@ -16,6 +16,7 @@
 package tools.dynamia.reports.core.services.impl
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.datasource.AbstractDataSource
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import tools.dynamia.domain.jdbc.JdbcHelper
@@ -35,6 +36,7 @@ import javax.persistence.EntityManager
 import javax.persistence.Query
 import javax.sql.DataSource
 import java.sql.Connection
+import java.sql.SQLException
 
 @Service
 class ReportsServiceImpl extends AbstractService implements ReportsService {
@@ -98,22 +100,22 @@ class ReportsServiceImpl extends AbstractService implements ReportsService {
     }
 
     static ReportData executeSQL(Report report, ReportFilters filters, ReportDataSource dataSource) {
+        ReportData data = null;
+        Connection connection = ReportsUtils.getJdbcConnection(dataSource)
 
+        try {
 
-        def jdbc = null
-        if (dataSource.delegate instanceof DataSource) {
-            jdbc = new JdbcHelper(dataSource.delegate as DataSource)
-        } else {
-            Connection connection = ReportsUtils.getJdbcConnection(dataSource)
-            jdbc = new JdbcHelper(connection)
+            def jdbc = new JdbcHelper(new ReportDataSource("delegate", connection))
+            jdbc.showSQL = false
+            String sql = buildSqlScript(report.queryScript, filters)
+
+            def result = filters.empty ? jdbc.query(sql) : jdbc.query(sql, filters.values)
+            data = ReportData.build(report, result)
+        } finally {
+            connection.close()
         }
 
-        String sql = buildSqlScript(report.queryScript, filters)
-
-
-        def result = filters.empty ? jdbc.query(sql) : jdbc.query(sql, filters.values)
-
-        return ReportData.build(report, result)
+        return data;
     }
 
     static ReportData executeJPQL(Report report, ReportFilters filters, ReportDataSource dataSource) {

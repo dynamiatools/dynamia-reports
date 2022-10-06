@@ -31,13 +31,11 @@ import java.sql.Connection
 class ReportsUtils {
 
     static Connection getJdbcConnection(ReportDataSource dataSource) {
-        if (dataSource.delegate instanceof Connection) {
-            return dataSource.delegate as Connection
-        } else if (dataSource.delegate instanceof DataSource) {
-            return (dataSource.delegate as DataSource).connection
-        } else {
+        var connection = dataSource.connection
+        if (connection == null) {
             throw new ReportsException("Error obtaining database connection from report datasource $dataSource")
         }
+        return connection
     }
 
     static EntityManager getJpaEntityManager(ReportDataSource dataSource) {

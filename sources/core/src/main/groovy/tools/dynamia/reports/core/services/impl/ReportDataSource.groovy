@@ -15,7 +15,13 @@
  */
 package tools.dynamia.reports.core.services.impl
 
-class ReportDataSource {
+import org.springframework.jdbc.datasource.AbstractDataSource
+
+import javax.sql.DataSource
+import java.sql.Connection
+import java.sql.SQLException
+
+class ReportDataSource extends AbstractDataSource {
 
     private String name
     private Object delegate
@@ -38,5 +44,20 @@ class ReportDataSource {
     @Override
     String toString() {
         return name
+    }
+
+    @Override
+    Connection getConnection() throws SQLException {
+        if (delegate instanceof Connection) {
+            return (Connection) delegate
+        } else if (delegate instanceof DataSource) {
+            return delegate.connection
+        }
+        return null
+    }
+
+    @Override
+    Connection getConnection(String username, String password) throws SQLException {
+        return getConnection()
     }
 }

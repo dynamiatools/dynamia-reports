@@ -88,22 +88,22 @@ class ReportFilter extends SimpleEntitySaaS {
         if (report.queryLang == "sql") {
             Connection connection = ReportsUtils.getJdbcConnection(dataSource)
             def jdbc = new JdbcHelper(connection)
+            try {
+                JdbcDataSet result = jdbc.query(ReportsUtils.checkQuery(queryValues))
 
-            JdbcDataSet result = jdbc.query(ReportsUtils.checkQuery(queryValues))
-
-
-            for (Row row : result) {
-                row.loadAll(result.columnsLabels)
-                Object value = row.col(result.columnsLabels[0])
-                if (result.columnsLabels.size() > 0) {
-                    options << new ReportFilterOption(this, row.col(result.columnsLabels[1]).toString(), value)
-                } else {
-                    options << new ReportFilterOption(this, value.toString(), value)
+                for (Row row : result) {
+                    row.loadAll(result.columnsLabels)
+                    Object value = row.col(result.columnsLabels[0])
+                    if (result.columnsLabels.size() > 0) {
+                        options << new ReportFilterOption(this, row.col(result.columnsLabels[1]).toString(), value)
+                    } else {
+                        options << new ReportFilterOption(this, value.toString(), value)
+                    }
                 }
-
+                result.close()
+            } finally {
+                connection.close()
             }
-
-
         } else if (report.queryLang == "jpql") {
             EntityManager em = ReportsUtils.getJpaEntityManager(dataSource)
             def result = em.createQuery(queryValues).resultList
@@ -119,6 +119,7 @@ class ReportFilter extends SimpleEntitySaaS {
                     options << new ReportFilterOption(this, b.toString(), b)
                 }
             }
+            em.close()
         }
         return options
     }
