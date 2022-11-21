@@ -55,7 +55,7 @@ class ReportFilter extends SimpleEntitySaaS {
     @Column(name = "filterOrder")
     int order
     boolean required
-    boolean hideLabel
+    Boolean hideLabel
 
     String queryValues
 
