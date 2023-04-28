@@ -23,7 +23,7 @@
     <packaging>pom</packaging>
     <groupId>tools.dynamia.reports</groupId>
     <artifactId>tools.dynamia.reports.parent</artifactId>
-    <version>1.3.1</version>
+    <version>1.4.0</version>
     <name>DynamiaReports</name>
     <description>DynamiaTools extension for build in app reports with queries and charts</description>
     <inceptionYear>2018</inceptionYear>
@@ -31,7 +31,7 @@
 
     <organization>
         <name>Dynamia Soluciones IT SAS</name>
-        <url>http://www.dynamiasoluciones.com</url>
+        <url>https://www.dynamiasoluciones.com</url>
     </organization>
 
     <developers>
@@ -48,13 +48,13 @@
     </scm>
 
     <properties>
-        <dynamiatools.version>4.1.0</dynamiatools.version>
-        <springboot.version>2.7.3</springboot.version>
-        <saas.version>2.8.0</saas.version>
+        <dynamiatools.version>4.2.0</dynamiatools.version>
+        <springboot.version>2.7.11</springboot.version>
+        <saas.version>2.9.0</saas.version>
         <java.version>11</java.version>
-        <groovylang.version>4.0.6</groovylang.version>
+        <groovylang.version>4.0.11</groovylang.version>
         <groovy.compiler>2.1.0</groovy.compiler>
-        <maven.compiler>3.8.1</maven.compiler>
+        <maven.compiler>3.11.0</maven.compiler>
         <source.encoding>UTF-8</source.encoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
