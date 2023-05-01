@@ -21,11 +21,11 @@ import tools.dynamia.modules.saas.jpa.SimpleEntitySaaS
 import tools.dynamia.reports.core.domain.enums.DataType
 import tools.dynamia.reports.core.domain.enums.TextAlign
 
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.ManyToOne
-import javax.persistence.Table
-import javax.validation.constraints.NotNull
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
+import jakarta.validation.constraints.NotNull
 
 @Entity
 @Table(name = "rpt_reports_fields")

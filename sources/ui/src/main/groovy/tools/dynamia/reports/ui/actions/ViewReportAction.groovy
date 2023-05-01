@@ -33,7 +33,7 @@ import tools.dynamia.reports.ui.ReportViewer
 import tools.dynamia.ui.UIMessages
 import tools.dynamia.zk.navigation.ComponentPage
 
-import javax.persistence.EntityManagerFactory
+import jakarta.persistence.EntityManagerFactory
 import javax.sql.DataSource
 
 @InstallAction

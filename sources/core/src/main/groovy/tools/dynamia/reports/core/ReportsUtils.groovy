@@ -23,8 +23,8 @@ import tools.dynamia.reports.api.EnumFilterProvider
 import tools.dynamia.reports.core.domain.Report
 import tools.dynamia.reports.core.services.impl.ReportDataSource
 
-import javax.persistence.EntityManager
-import javax.persistence.EntityManagerFactory
+import jakarta.persistence.EntityManager
+import jakarta.persistence.EntityManagerFactory
 import javax.sql.DataSource
 import java.sql.Connection
 

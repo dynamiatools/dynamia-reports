@@ -23,8 +23,8 @@ import tools.dynamia.integration.Containers
 import tools.dynamia.modules.saas.api.AccountServiceAPI
 import tools.dynamia.modules.saas.jpa.SimpleEntitySaaS
 
-import javax.persistence.*
-import javax.validation.constraints.NotNull
+import jakarta.persistence.*
+import jakarta.validation.constraints.NotNull
 
 import static tools.dynamia.domain.query.QueryConditions.eq
 

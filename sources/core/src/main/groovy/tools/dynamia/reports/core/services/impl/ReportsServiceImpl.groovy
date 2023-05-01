@@ -32,8 +32,8 @@ import tools.dynamia.reports.core.domain.Report
 import tools.dynamia.reports.core.domain.ReportFilter
 import tools.dynamia.reports.core.services.ReportsService
 
-import javax.persistence.EntityManager
-import javax.persistence.Query
+import jakarta.persistence.EntityManager
+import jakarta.persistence.Query
 import javax.sql.DataSource
 import java.sql.Connection
 import java.sql.SQLException

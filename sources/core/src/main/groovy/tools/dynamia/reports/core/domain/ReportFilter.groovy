@@ -27,7 +27,7 @@ import tools.dynamia.reports.core.ReportsUtils
 import tools.dynamia.reports.core.domain.enums.DataType
 import tools.dynamia.reports.core.services.impl.ReportDataSource
 
-import javax.persistence.*
+import jakarta.persistence.*
 import java.sql.Connection
 
 @Entity
