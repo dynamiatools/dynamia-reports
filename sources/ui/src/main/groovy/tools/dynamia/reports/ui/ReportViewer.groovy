@@ -27,6 +27,7 @@ import org.zkoss.zul.*
 import tools.dynamia.actions.Action
 import tools.dynamia.actions.ActionEvent
 import tools.dynamia.actions.ActionEventBuilder
+import tools.dynamia.actions.Actions
 import tools.dynamia.commons.ClassMessages
 import tools.dynamia.commons.StringUtils
 import tools.dynamia.commons.ValueWrapper
@@ -593,7 +594,7 @@ class ReportViewer extends Div implements ActionEventBuilder {
         ButtonActionRenderer renderer = new ButtonActionRenderer()
         renderer.zclass = "btn btn-default"
         actions.each { action ->
-            buttons.appendChild(renderer.render(action, this))
+            buttons.appendChild(Actions.render(renderer, action, this))
         }
 
     }
