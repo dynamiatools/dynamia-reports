@@ -48,7 +48,7 @@
     </scm>
 
     <properties>
-        <dynamiatools.version>5.0.0</dynamiatools.version>
+        <dynamiatools.version>5.0.1</dynamiatools.version>
         <springboot.version>3.0.6</springboot.version>
         <saas.version>3.0.0</saas.version>
         <java.version>17</java.version>
@@ -136,7 +136,7 @@
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.8</version>
+                <version>1.6.13</version>
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>ossrh</serverId>
