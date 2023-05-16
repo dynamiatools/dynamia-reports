@@ -16,10 +16,13 @@
 
 package tools.dynamia.reports.core
 
+import tools.dynamia.integration.CacheManagerUtils
 import tools.dynamia.reports.core.domain.Report
 import tools.dynamia.reports.core.domain.ReportGroup
 
 class Reports {
+    public static final String CACHE_NAME = "reports"
+
     ReportGroup group
     List<Report> list = new ArrayList<>()
 
@@ -37,5 +40,9 @@ class Reports {
         reports = reports.sort { a, b -> a.group.name <=> b.group.name }
 
         return reports
+    }
+
+    static void clearCache() {
+        CacheManagerUtils.clearCache(CACHE_NAME)
     }
 }

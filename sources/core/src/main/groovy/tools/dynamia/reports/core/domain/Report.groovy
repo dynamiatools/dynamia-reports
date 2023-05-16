@@ -25,6 +25,7 @@ import tools.dynamia.modules.saas.jpa.SimpleEntitySaaS
 
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotNull
+import tools.dynamia.reports.core.services.ReportsService
 
 import static tools.dynamia.domain.query.QueryConditions.eq
 
@@ -60,21 +61,11 @@ class Report extends SimpleEntitySaaS {
 
 
     static List<Report> findActivesByGroup(ReportGroup reportGroup) {
-        def accountsApi = Containers.get().findObject(AccountServiceAPI)
-
-
-        return DomainUtils.lookupCrudService().find(Report, QueryParameters.with("group.name", eq(reportGroup.name))
-                .add("active", true)
-                .add("accountId", accountsApi.systemAccountId).orderBy("name"))
+        return Containers.get().findObject(ReportsService).findActivesByGroup(reportGroup)
     }
 
     static List<Report> findActives() {
-        def accountsApi = Containers.get().findObject(AccountServiceAPI)
-        def accounts = new ArrayList([accountsApi.systemAccountId, accountsApi.currentAccountId])
-
-        return DomainUtils.lookupCrudService().find(Report, QueryParameters.with("active", true)
-                .add("group.active", true)
-                .add("accountId", QueryConditions.in(accounts)).orderBy("name"))
+        return Containers.get().findObject(ReportsService).findActives()
     }
 
     ReportFilter findFilter(String name) {

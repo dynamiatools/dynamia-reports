@@ -16,6 +16,8 @@
 package tools.dynamia.reports.core.services.impl
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.CacheConfig
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.jdbc.datasource.AbstractDataSource
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -23,6 +25,8 @@ import tools.dynamia.domain.jdbc.JdbcHelper
 import tools.dynamia.domain.query.QueryConditions
 import tools.dynamia.domain.query.QueryParameters
 import tools.dynamia.domain.services.AbstractService
+import tools.dynamia.domain.util.DomainUtils
+import tools.dynamia.integration.Containers
 import tools.dynamia.integration.sterotypes.Service
 import tools.dynamia.modules.saas.api.AccountServiceAPI
 import tools.dynamia.reports.core.ReportData
@@ -30,6 +34,7 @@ import tools.dynamia.reports.core.ReportFilters
 import tools.dynamia.reports.core.ReportsUtils
 import tools.dynamia.reports.core.domain.Report
 import tools.dynamia.reports.core.domain.ReportFilter
+import tools.dynamia.reports.core.domain.ReportGroup
 import tools.dynamia.reports.core.services.ReportsService
 
 import jakarta.persistence.EntityManager
@@ -38,7 +43,10 @@ import javax.sql.DataSource
 import java.sql.Connection
 import java.sql.SQLException
 
+import static tools.dynamia.domain.query.QueryConditions.eq
+
 @Service
+@CacheConfig(cacheNames = "reports")
 class ReportsServiceImpl extends AbstractService implements ReportsService {
 
     @Autowired
@@ -89,6 +97,7 @@ class ReportsServiceImpl extends AbstractService implements ReportsService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Cacheable(key = "'Report-'+#id")
     Report loadReportModel(Long id) {
         def report = crudService().findSingle(Report, QueryParameters.with("id", id).add("accountId", QueryConditions.isNotNull()))
         report.fields.size()
@@ -157,4 +166,30 @@ class ReportsServiceImpl extends AbstractService implements ReportsService {
 
         return query
     }
+
+    @Cacheable(key = "'ActiveReport'")
+    List<Report> findActives() {
+
+        def accounts = new ArrayList([accountServiceAPI.systemAccountId, accountServiceAPI.currentAccountId])
+
+        def params = QueryParameters.with("active", true)
+                .add("group.active", true)
+                .add("accountId", QueryConditions.in(accounts))
+                .orderBy("name")
+
+        List<Report> result = crudService().find(Report, params)
+
+        return result
+    }
+
+    @Cacheable(key = "'ActiveReportByGroup-'+#reportGroup.id")
+    List<Report> findActivesByGroup(ReportGroup reportGroup) {
+
+
+        return crudService().find(Report, QueryParameters.with("group.name", eq(reportGroup.name))
+                .add("active", true)
+                .add("accountId", accountServiceAPI.systemAccountId).orderBy("name"))
+    }
+
+
 }
