@@ -1,5 +1,5 @@
 [![Maven Central](https://img.shields.io/maven-central/v/tools.dynamia.reports/tools.dynamia.reports.core)](https://search.maven.org/search?q=tools.dynamia.reports)
-![Java Version Required](https://img.shields.io/badge/java-11+-blue)
+![Java Version Required](https://img.shields.io/badge/java-17-blue)
 
 # DynamiaReports
 
