@@ -1,55 +1,98 @@
-/*
- * Copyright (C)  2020. Dynamia Soluciones IT S.A.S - NIT 900302344-1 All Rights Reserved.
- * Colombia - South America
- *
- * This file is free software: you can redistribute it and/or modify it  under the terms of the
- *  GNU Lesser General Public License (LGPL v3) as published by the Free Software Foundation,
- *   either version 3 of the License, or (at your option) any later version.
- *
- *  This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- *   without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *   See the GNU Lesser General Public License for more details. You should have received a copy of the
- *   GNU Lesser General Public License along with this file.
- *   If not, see <https://www.gnu.org/licenses/>.
- *
- */
+package tools.dynamia.reports.core.domain;
 
-
-package tools.dynamia.reports.core.domain
-
-import tools.dynamia.domain.Descriptor
-import tools.dynamia.domain.contraints.NotEmpty
-import tools.dynamia.modules.saas.jpa.SimpleEntitySaaS
-
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.Table
-import jakarta.validation.constraints.NotNull
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import tools.dynamia.domain.Descriptor;
+import tools.dynamia.domain.contraints.NotEmpty;
+import tools.dynamia.modules.saas.jpa.SimpleEntitySaaS;
 
 @Entity
 @Table(name = "rpt_reports_charts")
-@Descriptor(fields = ["title", "labelField", "valueField", "type", "grouped", "order"], viewParams = "columns: 3")
-class ReportChart extends SimpleEntitySaaS {
+public class ReportChart extends SimpleEntitySaaS {
+
 
     @ManyToOne
-    Report report
+    private Report report;
     @NotEmpty
     @NotNull
-    String title
+    private String title;
     @NotEmpty
-    String labelField
+    private String labelField;
     @NotEmpty
-    String valueField
-    @Descriptor(params = "placeholder: pie, bar, horizontalbar, line, doughnut")
-    String type
+    private String valueField;
+
+    private String type;
     @Column(name = "fieldOrder")
-    @Descriptor(params = "width: 100px")
-    int order = 0
-    boolean grouped
+
+    private int order = 0;
+    private boolean grouped;
 
     @Override
-    String toString() {
-        return title
+    public String toString() {
+        return title;
     }
+
+    public Report getReport() {
+        return report;
+    }
+
+    public void setReport(Report report) {
+        this.report = report;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getLabelField() {
+        return labelField;
+    }
+
+    public void setLabelField(String labelField) {
+        this.labelField = labelField;
+    }
+
+    public String getValueField() {
+        return valueField;
+    }
+
+    public void setValueField(String valueField) {
+        this.valueField = valueField;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    public boolean getGrouped() {
+        return grouped;
+    }
+
+    public boolean isGrouped() {
+        return grouped;
+    }
+
+    public void setGrouped(boolean grouped) {
+        this.grouped = grouped;
+    }
+
 }

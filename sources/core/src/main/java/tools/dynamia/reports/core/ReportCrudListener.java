@@ -6,7 +6,6 @@ import tools.dynamia.reports.core.domain.Report;
 
 @Listener
 public class ReportCrudListener extends CrudServiceListenerAdapter<Report> {
-
     @Override
     public void afterCreate(Report entity) {
         Reports.clearCache();
@@ -21,4 +20,5 @@ public class ReportCrudListener extends CrudServiceListenerAdapter<Report> {
     public void afterDelete(Report entity) {
         Reports.clearCache();
     }
+
 }

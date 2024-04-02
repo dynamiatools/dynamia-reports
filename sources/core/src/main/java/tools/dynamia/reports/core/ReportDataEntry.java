@@ -1,32 +1,104 @@
-package tools.dynamia.reports.core
+package tools.dynamia.reports.core;
 
-import tools.dynamia.commons.BeanUtils
-import tools.dynamia.domain.jdbc.Row
+import tools.dynamia.commons.BeanUtils;
+import tools.dynamia.commons.DynamicComparator;
+import tools.dynamia.domain.jdbc.Row;
 
-class ReportDataEntry {
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-    String name
-    Object value
-    Map<String, Object> values = new HashMap<>()
-    boolean singleValue
+public class ReportDataEntry {
 
-    static ReportDataEntry build(List<String> names, Row row) {
-        def entry = new ReportDataEntry(singleValue: false)
-        names.each { name ->
-            entry.values[name] = row.col(name)
-        }
-        return entry
+    private String name;
+    private Object value;
+    private Map<String, Object> values = new HashMap<>();
+    private boolean singleValue;
+
+    public ReportDataEntry() {
     }
 
-    static ReportDataEntry build(List<String> names, Object bean) {
-        def entry = new ReportDataEntry(singleValue: false)
-        entry.name = bean.toString()
-        entry.value = bean
-        names.each { name ->
-            entry.values[name] = BeanUtils.invokeBooleanGetMethod(bean, name)
+    public ReportDataEntry(String name, Object value, boolean singleValue) {
+        this.name = name;
+        this.value = value;
+        this.singleValue = singleValue;
+    }
+
+    public static ReportDataEntry build(List<String> names, Row row) {
+        ReportDataEntry entry = new ReportDataEntry();
+        entry.singleValue = false;
+        names.forEach(name -> {
+            entry.values.put(name, row.col(name));
+        });
+        return entry;
+    }
+
+    public static ReportDataEntry build(List<String> names, Object bean) {
+        ReportDataEntry entry = new ReportDataEntry();
+        entry.singleValue = false;
+        entry.name = bean.toString();
+        entry.value = bean;
+        names.forEach(name -> {
+            entry.values.put(name, BeanUtils.invokeBooleanGetMethod(bean, name));
+        });
+        return entry;
+    }
+
+    public int compareTo(String field, ReportDataEntry other) {
+        Object thisValue = values.get(field);
+        Object otherValue = other.getValues().get(field);
+
+        Integer result = null;
+        if (thisValue != null && otherValue == null) {
+            result = 1;
+        } else if (thisValue == null && otherValue != null) {
+            result = -1;
+        } else if (thisValue == null && otherValue == null) {
+            result = 0;
         }
-        return entry
+
+        if (result == null && thisValue instanceof Comparable value1 && otherValue instanceof Comparable value2) {
+            result = value1.compareTo(value2);
+        }
+
+        if (result == null) {
+            result = 0;
+        }
+        return result;
     }
 
 
+    // Getters and setters
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
+    }
+
+    public Map<String, Object> getValues() {
+        return values;
+    }
+
+    public void setValues(Map<String, Object> values) {
+        this.values = values;
+    }
+
+    public boolean isSingleValue() {
+        return singleValue;
+    }
+
+    public void setSingleValue(boolean singleValue) {
+        this.singleValue = singleValue;
+    }
 }

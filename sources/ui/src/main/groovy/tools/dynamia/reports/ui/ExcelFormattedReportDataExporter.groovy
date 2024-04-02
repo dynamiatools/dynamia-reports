@@ -16,7 +16,6 @@
 
 package tools.dynamia.reports.ui
 
-
 import org.apache.poi.ss.usermodel.BuiltinFormats
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.HorizontalAlignment
@@ -37,7 +36,8 @@ import tools.dynamia.reports.core.domain.ReportField
 import tools.dynamia.reports.core.domain.ReportFilter
 import tools.dynamia.reports.core.domain.enums.DataType
 import tools.dynamia.reports.core.domain.enums.TextAlign
-import tools.dynamia.templates.VelocityTemplateEngine
+import tools.dynamia.templates.SimpleTemplateEngine
+import tools.dynamia.templates.TemplateEngine
 
 class ExcelFormattedReportDataExporter implements ReportDataExporter {
 
@@ -121,7 +121,10 @@ class ExcelFormattedReportDataExporter implements ReportDataExporter {
 
     private String parse(String s) {
         if (s != null) {
-            def engine = new VelocityTemplateEngine()
+            def engine = Containers.get().findObject(TemplateEngine)
+            if (engine == null) {
+                engine = new SimpleTemplateEngine();
+            }
             return engine.evaluate(s, globalParams)
         } else {
             return ""

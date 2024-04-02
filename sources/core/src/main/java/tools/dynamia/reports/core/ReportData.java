@@ -1,85 +1,67 @@
-/*
- * Copyright (C)  2020. Dynamia Soluciones IT S.A.S - NIT 900302344-1 All Rights Reserved.
- * Colombia - South America
- *
- * This file is free software: you can redistribute it and/or modify it  under the terms of the
- *  GNU Lesser General Public License (LGPL v3) as published by the Free Software Foundation,
- *   either version 3 of the License, or (at your option) any later version.
- *
- *  This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- *   without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *   See the GNU Lesser General Public License for more details. You should have received a copy of the
- *   GNU Lesser General Public License along with this file.
- *   If not, see <https://www.gnu.org/licenses/>.
- *
- */
-package tools.dynamia.reports.core
+package tools.dynamia.reports.core;
 
+import java.util.*;
 
-import tools.dynamia.domain.jdbc.JdbcDataSet
-import tools.dynamia.reports.core.domain.Report
+import tools.dynamia.domain.jdbc.JdbcDataSet;
+import tools.dynamia.reports.core.domain.Report;
+import tools.dynamia.reports.core.domain.ReportField;
 
-class ReportData {
+public class ReportData {
 
-    private Report report
-    private List<ReportDataEntry> entries = new ArrayList<>()
-    private List<String> fieldNames
+    private Report report;
+    private List<ReportDataEntry> entries = new ArrayList<>();
+    private List<String> fieldNames;
 
-    static ReportData build(Report report, JdbcDataSet dataSet) {
-        ReportData data = new ReportData(report: report)
-        List<String> fields = report.autofields ? dataSet.columnsLabels : report.fields.collect { it.name }
-        data.fieldNames = fields
-        dataSet.rows.each { row ->
-            data.entries << ReportDataEntry.build(fields, row)
-        }
-        dataSet.close()
+    public static ReportData build(Report report, JdbcDataSet dataSet) {
+        ReportData data = new ReportData();
+        data.report = report;
+        List<String> fields = report.isAutofields() ? dataSet.getColumnsLabels() : report.getFields().stream().map(ReportField::getName).toList();
+        data.fieldNames = fields;
+        dataSet.getRows().forEach(row -> {
+            data.entries.add(ReportDataEntry.build(fields, row));
+        });
+        dataSet.close();
 
-        return data
+        return data;
     }
 
-    static ReportData build(Report report, Collection collection) {
-        ReportData data = new ReportData(report: report)
-        if (report.autofields) {
-            data.fieldNames = Collections.singletonList("Result")
-            collection.each { obj ->
-                data.entries << new ReportDataEntry(singleValue: true, name: obj.toString(), value: obj)
-            }
-        } else if (!report.fields.empty) {
-            def fields = report.fields.collect { it.name }
-            data.fieldNames = fields
-            collection.each { obj ->
-                data.entries << ReportDataEntry.build(fields, obj)
-            }
+    public static ReportData build(Report report, Collection collection) {
+        ReportData data = new ReportData();
+        data.report = report;
+        if (report.isAutofields()) {
+            data.fieldNames = Collections.singletonList("Result");
+            collection.forEach(obj -> data.entries.add(new ReportDataEntry(obj.toString(), obj, true)));
+        } else if (!report.getFields().isEmpty()) {
+            List<String> fields = report.getFields().stream().map(ReportField::getName).toList();
+            data.fieldNames = fields;
+            collection.forEach(obj -> data.entries.add(ReportDataEntry.build(fields, obj)));
         }
 
-        return data
+        return data;
     }
 
-    void sort(String field, boolean ascending) {
-        println "Sorting Ascending? $ascending"
-        entries.sort { e1, e2 -> ascending ? e1.values[field] <=> e2.values[field] : e2.values[field] <=> e1.values[field] }
+    public void sort(String field, boolean ascending) {
+        System.out.println("Sorting Ascending? " + ascending);
+        entries.sort((e1, e2) -> ascending ? e1.compareTo(field, e2) : e2.compareTo(field, e1));
     }
 
-    Report getReport() {
-        return report
+    public Report getReport() {
+        return report;
     }
 
-    List<ReportDataEntry> getEntries() {
-        return entries
+    public List<ReportDataEntry> getEntries() {
+        return entries;
     }
 
-    int getSize() {
-        return entries.size()
+    public int getSize() {
+        return entries.size();
     }
 
-    boolean isEmpty() {
-        return entries.empty
+    public boolean isEmpty() {
+        return entries.isEmpty();
     }
 
-    List<String> getFieldNames() {
-        return fieldNames
+    public List<String> getFieldNames() {
+        return fieldNames;
     }
-
 }
-
-

@@ -1,195 +1,151 @@
-/*
- * Copyright (C)  2020. Dynamia Soluciones IT S.A.S - NIT 900302344-1 All Rights Reserved.
- * Colombia - South America
- *
- * This file is free software: you can redistribute it and/or modify it  under the terms of the
- *  GNU Lesser General Public License (LGPL v3) as published by the Free Software Foundation,
- *   either version 3 of the License, or (at your option) any later version.
- *
- *  This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- *   without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *   See the GNU Lesser General Public License for more details. You should have received a copy of the
- *   GNU Lesser General Public License along with this file.
- *   If not, see <https://www.gnu.org/licenses/>.
- *
- */
-package tools.dynamia.reports.core.services.impl
+package tools.dynamia.reports.core.services.impl;
 
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cache.annotation.CacheConfig
-import org.springframework.cache.annotation.Cacheable
-import org.springframework.jdbc.datasource.AbstractDataSource
-import org.springframework.transaction.annotation.Propagation
-import org.springframework.transaction.annotation.Transactional
-import tools.dynamia.domain.jdbc.JdbcHelper
-import tools.dynamia.domain.query.QueryConditions
-import tools.dynamia.domain.query.QueryParameters
-import tools.dynamia.domain.services.AbstractService
-import tools.dynamia.domain.util.DomainUtils
-import tools.dynamia.integration.Containers
-import tools.dynamia.integration.sterotypes.Service
-import tools.dynamia.modules.saas.api.AccountServiceAPI
-import tools.dynamia.reports.core.ReportData
-import tools.dynamia.reports.core.ReportFilters
-import tools.dynamia.reports.core.ReportsUtils
-import tools.dynamia.reports.core.domain.Report
-import tools.dynamia.reports.core.domain.ReportFilter
-import tools.dynamia.reports.core.domain.ReportGroup
-import tools.dynamia.reports.core.services.ReportsService
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import tools.dynamia.domain.jdbc.JdbcHelper;
+import tools.dynamia.domain.query.QueryConditions;
+import tools.dynamia.domain.query.QueryParameters;
+import tools.dynamia.domain.services.AbstractService;
+import tools.dynamia.integration.sterotypes.Service;
+import tools.dynamia.modules.saas.api.AccountServiceAPI;
+import tools.dynamia.reports.core.*;
+import tools.dynamia.reports.core.domain.Report;
+import tools.dynamia.reports.core.domain.ReportFilter;
+import tools.dynamia.reports.core.domain.ReportGroup;
+import tools.dynamia.reports.core.services.ReportsService;
 
-import jakarta.persistence.EntityManager
-import jakarta.persistence.Query
-import javax.sql.DataSource
-import java.sql.Connection
-import java.sql.SQLException
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 
-import static tools.dynamia.domain.query.QueryConditions.eq
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @CacheConfig(cacheNames = "reports")
-class ReportsServiceImpl extends AbstractService implements ReportsService {
+public class ReportsServiceImpl extends AbstractService implements ReportsService {
 
     @Autowired
-    private AccountServiceAPI accountServiceAPI
-
+    private AccountServiceAPI accountServiceAPI;
 
     @Override
-    ReportData execute(Report report, ReportFilters filters, ReportDataSource datasource) {
-        log("Executing query for report: $report.name - $report.queryLang")
-        long start = System.currentTimeMillis()
-        ReportData data = null
-        loadDefaultFilters(report, filters)
-        switch (report.queryLang) {
+    public ReportData execute(Report report, ReportFilters filters, ReportDataSource datasource) {
+        log("Executing query for report: " + report.getName() + " - " + report.getQueryLang());
+        long start = System.currentTimeMillis();
+        ReportData data = null;
+        loadDefaultFilters(report, filters);
+        switch (report.getQueryLang()) {
             case "sql":
-                data = executeSQL(report, filters, datasource)
-                break
+                data = executeSQL(report, filters, datasource);
+                break;
             case "jpql":
-                data = executeJPQL(report, filters, datasource)
-                break
+                data = executeJPQL(report, filters, datasource);
+                break;
         }
-        long end = System.currentTimeMillis()
-        log("Report $report.name executed in ${end - start}ms")
-        return data
+        long end = System.currentTimeMillis();
+        log("Report " + report.getName() + " executed in " + (end - start) + "ms");
+        return data;
     }
 
-    def loadDefaultFilters(Report report, ReportFilters reportFilters) {
-        boolean checkQuery = true
-        if (!reportFilters.empty) {
-            def filter = reportFilters.getFilter("accountId")
+    private void loadDefaultFilters(Report report, ReportFilters reportFilters) {
+        boolean checkQuery = true;
+        if (!reportFilters.isEmpty()) {
+            ReportFilter filter = reportFilters.getFilter("accountId");
             if (filter != null) {
-                reportFilters.add(filter, accountServiceAPI.currentAccountId)
-                checkQuery = false
+                reportFilters.add(filter, accountServiceAPI.getCurrentAccountId());
+                checkQuery = false;
             }
         }
 
-        if (checkQuery && report.queryScript.contains(":accountId")) {
-            def filter = new ReportFilter(name: "accountId")
-            def systemAccountId = accountServiceAPI.systemAccountId
-            if (report.accountId != systemAccountId) {
-                reportFilters.add(filter, report.accountId)
+        if (checkQuery && report.getQueryScript().contains(":accountId")) {
+            ReportFilter filter = new ReportFilter("accountId");
+            Long systemAccountId = accountServiceAPI.getSystemAccountId();
+            if (!Objects.equals(report.getAccountId(), systemAccountId)) {
+                reportFilters.add(filter, report.getAccountId());
             } else {
-                reportFilters.add(filter, accountServiceAPI.currentAccountId)
+                reportFilters.add(filter, accountServiceAPI.getCurrentAccountId());
             }
-
         }
-
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Cacheable(key = "'Report-'+#id")
-    Report loadReportModel(Long id) {
-        def report = crudService().findSingle(Report, QueryParameters.with("id", id).add("accountId", QueryConditions.isNotNull()))
-        report.fields.size()
-        report.filters.size()
-        report.queryScript.size()
-        report.charts.size()
-
-        return report
+    @Cacheable(key = "'Report-' + #id")
+    public Report loadReportModel(Long id) {
+        Report report = crudService().findSingle(Report.class, QueryParameters.with("id", id).add("accountId", QueryConditions.isNotNull()));
+        report.getFields().size();
+        report.getFilters().size();
+        report.getCharts().size();
+        return report;
     }
 
-    static ReportData executeSQL(Report report, ReportFilters filters, ReportDataSource dataSource) {
+    private static ReportData executeSQL(Report report, ReportFilters filters, ReportDataSource dataSource) {
         ReportData data = null;
-        Connection connection = ReportsUtils.getJdbcConnection(dataSource)
 
-        try {
+        try (Connection connection = ReportsUtils.getJdbcConnection(dataSource)) {
+            var jdbc = new JdbcHelper(new ReportDataSource("delegate", connection));
+            jdbc.setShowSQL(false);
+            String sql = buildSqlScript(report.getQueryScript(), filters);
 
-            def jdbc = new JdbcHelper(new ReportDataSource("delegate", connection))
-            jdbc.showSQL = false
-            String sql = buildSqlScript(report.queryScript, filters)
-
-            def result = filters.empty ? jdbc.query(sql) : jdbc.query(sql, filters.values)
-            data = ReportData.build(report, result)
-        } finally {
-            connection.close()
+            var result = filters.isEmpty() ? jdbc.query(sql) : jdbc.query(sql, filters.getValues());
+            data = ReportData.build(report, result);
+        } catch (SQLException e) {
+            throw new ReportsException(e);
         }
 
         return data;
     }
 
-    static ReportData executeJPQL(Report report, ReportFilters filters, ReportDataSource dataSource) {
-        EntityManager em = ReportsUtils.getJpaEntityManager(dataSource)
-
-
-        String jpql = buildSqlScript(report.queryScript, filters)
-        Query query = em.createQuery(jpql)
-        filters.values.each { k, v ->
-            query.setParameter(k, v)
-        }
-
-        List result = query.getResultList()
-
-        return ReportData.build(report, result)
+    private static ReportData executeJPQL(Report report, ReportFilters filters, ReportDataSource dataSource) {
+        EntityManager em = ReportsUtils.getJpaEntityManager(dataSource);
+        String jpql = buildSqlScript(report.getQueryScript(), filters);
+        Query query = em.createQuery(jpql);
+        filters.getValues().forEach(query::setParameter);
+        List result = query.getResultList();
+        return ReportData.build(report, result);
     }
 
-
-    static String buildSqlScript(String query, ReportFilters filters) {
-        query = query.replace("\n", " ").replace("\t", " ")
-        StringBuilder filters_sql = new StringBuilder("")
-
-        if (!filters.empty && !query.contains("where")) {
-            filters_sql.append("where 1=1 ")
+    private static String buildSqlScript(String query, ReportFilters filters) {
+        query = query.replace("\n", " ").replace("\t", " ");
+        StringBuilder filtersSql = new StringBuilder("");
+        if (!filters.isEmpty() && !query.contains("where")) {
+            filtersSql.append("where 1=1 ");
         }
-
-        for (String filterName : filters.filtersNames) {
-            ReportFilter filter = filters.getFilter(filterName)
-            if (filter.condition) {
-                filters_sql.append(" and ").append(filter.condition)
+        for (String filterName : filters.getFiltersNames()) {
+            ReportFilter filter = filters.getFilter(filterName);
+            if (filter.getCondition() != null) {
+                filtersSql.append(" and ").append(filter.getCondition());
             }
         }
-
         if (query.contains("<FILTERS>")) {
-            query = query.replace("<FILTERS>", filters_sql.toString())
+            query = query.replace("<FILTERS>", filtersSql.toString());
         } else {
-            query = "$query $filters_sql"
+            query = query + " " + filtersSql;
         }
-
-        return query
+        return query;
     }
 
     @Cacheable(key = "'ActiveReport'")
-    List<Report> findActives() {
-
-        def accounts = new ArrayList([accountServiceAPI.systemAccountId, accountServiceAPI.currentAccountId])
-
-        def params = QueryParameters.with("active", true)
+    public List<Report> findActives() {
+        List<Long> accounts = new ArrayList<>();
+        accounts.add(accountServiceAPI.getSystemAccountId());
+        accounts.add(accountServiceAPI.getCurrentAccountId());
+        QueryParameters params = QueryParameters.with("active", true)
                 .add("group.active", true)
                 .add("accountId", QueryConditions.in(accounts))
-                .orderBy("name")
-
-        List<Report> result = crudService().find(Report, params)
-
-        return result
+                .orderBy("name");
+        return crudService().find(Report.class, params);
     }
 
-    @Cacheable(key = "'ActiveReportByGroup-'+#reportGroup.id")
-    List<Report> findActivesByGroup(ReportGroup reportGroup) {
-
-
-        return crudService().find(Report, QueryParameters.with("group.name", eq(reportGroup.name))
+    @Cacheable(key = "'ActiveReportByGroup-' + #reportGroup.id")
+    public List<Report> findActivesByGroup(ReportGroup reportGroup) {
+        return crudService().find(Report.class, QueryParameters.with("group.name", QueryConditions.eq(reportGroup.getName()))
                 .add("active", true)
-                .add("accountId", accountServiceAPI.systemAccountId).orderBy("name"))
+                .add("accountId", accountServiceAPI.getSystemAccountId()).orderBy("name"));
     }
-
-
 }

@@ -18,9 +18,6 @@ Is a small reporting framework built using DynamiaTools for generate reports in 
 - View reports data as charts
 
 
-## Future Features
-- Integrate reports data in HTML templates for advanced reports
-
 ## Architecture
 Modules organization
 

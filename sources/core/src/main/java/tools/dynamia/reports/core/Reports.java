@@ -1,48 +1,71 @@
-/*
- * Copyright (C)  2020. Dynamia Soluciones IT S.A.S - NIT 900302344-1 All Rights Reserved.
- * Colombia - South America
- *
- * This file is free software: you can redistribute it and/or modify it  under the terms of the
- *  GNU Lesser General Public License (LGPL v3) as published by the Free Software Foundation,
- *   either version 3 of the License, or (at your option) any later version.
- *
- *  This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- *   without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *   See the GNU Lesser General Public License for more details. You should have received a copy of the
- *   GNU Lesser General Public License along with this file.
- *   If not, see <https://www.gnu.org/licenses/>.
- *
- */
+package tools.dynamia.reports.core;
 
-package tools.dynamia.reports.core
+import tools.dynamia.integration.CacheManagerUtils;
+import tools.dynamia.reports.core.domain.Report;
+import tools.dynamia.reports.core.domain.ReportGroup;
 
-import tools.dynamia.integration.CacheManagerUtils
-import tools.dynamia.reports.core.domain.Report
-import tools.dynamia.reports.core.domain.ReportGroup
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
-class Reports {
-    public static final String CACHE_NAME = "reports"
+public class Reports {
 
-    ReportGroup group
-    List<Report> list = new ArrayList<>()
+    public static final String CACHE_NAME = "reports";
 
-    static List<Reports> loadAll() {
-        List<Reports> reports = new ArrayList<>()
+    public static List<Reports> loadAll() {
+        List<Reports> reports = new ArrayList<>();
 
-        Report.findActives().each { rp ->
-            Reports currentReports = reports.find { it.group.name == rp.group.name }
+        Report.findActives().forEach(rp -> {
+            Reports currentReports = reports.stream()
+                    .filter(report -> report.getGroup().getName().equals(rp.getGroup().getName()))
+                    .findFirst()
+                    .orElse(null);
+
             if (currentReports == null) {
-                currentReports = new Reports(group: rp.group)
-                reports << currentReports
+                currentReports = new Reports(rp.getGroup());
+                reports.add(currentReports);
             }
-            currentReports.list << rp
-        }
-        reports = reports.sort { a, b -> a.group.name <=> b.group.name }
 
-        return reports
+            currentReports.getList().add(rp);
+        });
+
+        reports.sort(Comparator.comparing(a -> a.getGroup().getName()));
+
+        return reports;
     }
 
-    static void clearCache() {
-        CacheManagerUtils.clearCache(CACHE_NAME)
+    public static void clearCache() {
+        CacheManagerUtils.clearCache(CACHE_NAME);
+    }
+
+
+
+
+
+    private ReportGroup group;
+    private List<Report> list = new ArrayList<>();
+
+    public Reports() {
+    }
+
+    public Reports(ReportGroup group) {
+        this.group = group;
+    }
+
+    // Getters and setters
+    public ReportGroup getGroup() {
+        return group;
+    }
+
+    public void setGroup(ReportGroup group) {
+        this.group = group;
+    }
+
+    public List<Report> getList() {
+        return list;
+    }
+
+    public void setList(List<Report> list) {
+        this.list = list;
     }
 }

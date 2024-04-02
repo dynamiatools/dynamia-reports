@@ -16,9 +16,7 @@
 
 package tools.dynamia.reports.ui
 
-import converters.CurrencySimple
-import converters.Decimal
-import converters.Integer
+
 import org.zkoss.zhtml.Hr
 import org.zkoss.zk.ui.Component
 import org.zkoss.zk.ui.event.Events
@@ -29,6 +27,7 @@ import tools.dynamia.actions.ActionEvent
 import tools.dynamia.actions.ActionEventBuilder
 import tools.dynamia.actions.Actions
 import tools.dynamia.commons.ClassMessages
+import tools.dynamia.commons.Formatters
 import tools.dynamia.commons.StringUtils
 import tools.dynamia.commons.ValueWrapper
 import tools.dynamia.commons.reflect.AccessMode
@@ -47,16 +46,17 @@ import tools.dynamia.reports.core.domain.Report
 import tools.dynamia.reports.core.domain.ReportField
 import tools.dynamia.reports.core.domain.enums.DataType
 import tools.dynamia.reports.core.services.ReportsService
-import tools.dynamia.reports.core.services.impl.ReportDataSource
+import tools.dynamia.reports.core.ReportDataSource
 import tools.dynamia.ui.MessageType
 import tools.dynamia.ui.UIMessages
 import tools.dynamia.viewers.Field
 import tools.dynamia.viewers.impl.DefaultViewDescriptor
 import tools.dynamia.web.util.HttpUtils
 import tools.dynamia.zk.actions.ButtonActionRenderer
-import tools.dynamia.zk.addons.chartjs.CategoryChartjsData
-import tools.dynamia.zk.addons.chartjs.Chartjs
+
 import tools.dynamia.zk.crud.ui.EntityFiltersPanel
+import tools.dynamia.zk.ui.chartjs.CategoryChartjsData
+import tools.dynamia.zk.ui.chartjs.Chartjs
 
 class ReportViewer extends Div implements ActionEventBuilder {
 
@@ -407,7 +407,7 @@ class ReportViewer extends Div implements ActionEventBuilder {
                     switch (reportField.dataType) {
                         case DataType.CURRENCY:
                             if (cellData instanceof Number) {
-                                cellData = new CurrencySimple().format(cellData)
+                                cellData = Formatters.formatCurrency(cellData)
                             }
                             break
                     }
@@ -434,13 +434,13 @@ class ReportViewer extends Div implements ActionEventBuilder {
                     if (reportField != null) {
                         switch (reportField.dataType) {
                             case DataType.CURRENCY:
-                                footerValue = new CurrencySimple().format(footerValue)
+                                footerValue = Formatters.formatCurrency(footerValue)
                                 break
                             case DataType.NUMBER:
                                 if (footerValue instanceof Double) {
-                                    footerValue = new Decimal().format(footerValue)
+                                    footerValue = Formatters.formatDecimal(footerValue)
                                 } else {
-                                    footerValue = new Integer().format(footerValue)
+                                    footerValue = Formatters.formatInteger(footerValue)
                                 }
                         }
                         footer.style = reportField.cellStyle
