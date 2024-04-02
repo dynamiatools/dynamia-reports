@@ -1,9 +1,8 @@
 package tools.dynamia.reports.core.domain;
 
-import groovy.lang.Closure;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import tools.dynamia.domain.contraints.NotEmpty;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.modules.saas.jpa.SimpleEntitySaaS;
@@ -51,7 +50,7 @@ public class Report extends SimpleEntitySaaS {
         return Containers.get().findObject(ReportsService.class).findActivesByGroup(reportGroup);
     }
 
-   public static List<Report> findActives() {
+    public static List<Report> findActives() {
         return Containers.get().findObject(ReportsService.class).findActives();
     }
 

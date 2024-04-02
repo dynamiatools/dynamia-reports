@@ -48,11 +48,6 @@
 
     <dependencies>
 
-
-        <dependency>
-            <groupId>org.apache.groovy</groupId>
-            <artifactId>groovy</artifactId>
-        </dependency>
         <dependency>
             <groupId>tools.dynamia.reports</groupId>
             <artifactId>tools.dynamia.reports.api</artifactId>
