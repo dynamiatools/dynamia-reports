@@ -6,6 +6,7 @@ fields:
   name:
   group:
   description:
+  dataSourceConfig:
   autofields:
   chartable:
   active:

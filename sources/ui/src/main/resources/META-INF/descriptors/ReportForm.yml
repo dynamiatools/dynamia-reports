@@ -16,8 +16,12 @@ fields:
     params:
       span: 2
   subtitle:
+  dataSourceConfig:
+    component: combobox
     params:
-      span: 2
+      automodel: true
+      readonly: true
+
   queryLang:
     visible: false
   chartable:

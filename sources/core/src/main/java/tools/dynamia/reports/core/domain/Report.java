@@ -45,6 +45,9 @@ public class Report extends SimpleEntitySaaS {
 
     private String endpointName;
 
+    @ManyToOne
+    private ReportDataSourceConfig dataSourceConfig;
+
 
     public static List<Report> findActivesByGroup(ReportGroup reportGroup) {
         return Containers.get().findObject(ReportsService.class).findActivesByGroup(reportGroup);
@@ -206,5 +209,13 @@ public class Report extends SimpleEntitySaaS {
 
     public void setEndpointName(String endpointName) {
         this.endpointName = endpointName;
+    }
+
+    public ReportDataSourceConfig getDataSourceConfig() {
+        return dataSourceConfig;
+    }
+
+    public void setDataSourceConfig(ReportDataSourceConfig dataSourceConfig) {
+        this.dataSourceConfig = dataSourceConfig;
     }
 }

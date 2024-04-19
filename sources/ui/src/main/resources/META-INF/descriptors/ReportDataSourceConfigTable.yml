@@ -1,0 +1,11 @@
+view: table
+beanClass: tools.dynamia.reports.core.domain.ReportDataSourceConfig
+autofields: false
+
+
+fields:
+  name:
+  driverClassName:
+  url:
+  username:
+

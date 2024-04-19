@@ -70,6 +70,7 @@
         <module>api</module>
         <module>core</module>
         <module>ui</module>
+        <module>boot</module>
     </modules>
 
 

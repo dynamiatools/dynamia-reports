@@ -71,8 +71,12 @@ public class ReportsUtils {
 
     public static ReportDataSource findDatasource(Report report) {
         if ("sql".equals(report.getQueryLang())) {
-            DataSource dataSource = Containers.get().findObject(DataSource.class);
-            return new ReportDataSource("Database", dataSource);
+            if (report.getDataSourceConfig() != null) {
+                return new ReportDataSource(report.getDataSourceConfig().getName(), report.getDataSourceConfig());
+            } else {
+                DataSource dataSource = Containers.get().findObject(DataSource.class);
+                return new ReportDataSource("Database", dataSource);
+            }
         } else {
             EntityManagerFactory em = Containers.get().findObject(EntityManagerFactory.class);
             return new ReportDataSource("EntityManager", em);

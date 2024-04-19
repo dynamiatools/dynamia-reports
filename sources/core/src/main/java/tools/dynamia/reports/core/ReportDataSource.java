@@ -1,6 +1,11 @@
 package tools.dynamia.reports.core;
 
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.AbstractDataSource;
+import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import tools.dynamia.domain.jdbc.JdbcHelper;
+import tools.dynamia.reports.core.domain.ReportDataSourceConfig;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -33,13 +38,29 @@ public class ReportDataSource extends AbstractDataSource {
 
     @Override
     public Connection getConnection() throws SQLException {
-        if (delegate instanceof Connection) {
-            return (Connection) delegate;
-        } else if (delegate instanceof DataSource) {
-            return ((DataSource) delegate).getConnection();
+        if (delegate instanceof Connection connection) {
+            return connection;
+        } else if (delegate instanceof DataSource dataSource) {
+            return dataSource.getConnection();
+        } else if (delegate instanceof ReportDataSourceConfig config) {
+            return newConnection(config);
         }
 
         return null;
+    }
+
+    public static Connection newConnection(ReportDataSourceConfig config) {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName(config.getDriverClassName());
+        dataSource.setUrl(config.getUrl());
+        dataSource.setUsername(config.getUsername());
+        dataSource.setPassword(config.getPassword());
+
+        try {
+            return dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new ReportsException("Cannot create database connection using datasource: " + config.getName());
+        }
     }
 
     @Override
