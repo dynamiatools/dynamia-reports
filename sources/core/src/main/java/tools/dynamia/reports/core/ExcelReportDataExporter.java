@@ -1,78 +1,65 @@
-/*
- * Copyright (C)  2020. Dynamia Soluciones IT S.A.S - NIT 900302344-1 All Rights Reserved.
- * Colombia - South America
- *
- * This file is free software: you can redistribute it and/or modify it  under the terms of the
- *  GNU Lesser General Public License (LGPL v3) as published by the Free Software Foundation,
- *   either version 3 of the License, or (at your option) any later version.
- *
- *  This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- *   without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *   See the GNU Lesser General Public License for more details. You should have received a copy of the
- *   GNU Lesser General Public License along with this file.
- *   If not, see <https://www.gnu.org/licenses/>.
- *
- */
+package tools.dynamia.reports.core;
 
-package tools.dynamia.reports.ui
+import java.io.File;
+import java.util.Comparator;
 
-import org.zkoss.zul.Filedownload
-import tools.dynamia.commons.StringUtils
-import tools.dynamia.reports.core.ReportData
-import tools.dynamia.reports.core.ReportDataEntry
-import tools.dynamia.reports.core.domain.Report
-import tools.dynamia.reports.core.domain.ReportField
-import tools.dynamia.reports.excel.ExcelFileWriter
+import tools.dynamia.commons.StringUtils;
+import tools.dynamia.reports.ReportExporterException;
+import tools.dynamia.reports.core.domain.Report;
+import tools.dynamia.reports.core.domain.ReportField;
+import tools.dynamia.reports.excel.ExcelFileWriter;
 
-class ExcelReportDataExporter implements ReportDataExporter {
+public class ExcelReportDataExporter implements ReportDataExporter<File> {
 
-    private Report report
+    private Report report;
 
-
-    ExcelReportDataExporter(Report report) {
-        this.report = report
+    public ExcelReportDataExporter() {
     }
 
-    def export(ReportData reportData) {
-        if (reportData != null) {
-            def file = File.createTempFile(report.name.replace(" ", "_") + "_", ".xlsx")
-            def exporter = new ExcelFileWriter(file)
-            //columns
-            exportColumns(reportData, exporter)
-            exportRows(reportData, exporter)
-            exporter.write()
-            exporter.close()
+    public ExcelReportDataExporter(Report report) {
+        this.report = report;
+    }
 
-            Filedownload.save(file, "application/excel")
+    @Override
+    public File export(ReportData reportData) {
+        try {
+            File file = File.createTempFile(report.getName().replace(" ", "_") + "_", ".xlsx");
+            ExcelFileWriter exporter = new ExcelFileWriter(file);
+            // columns
+            exportColumns(reportData, exporter);
+            exportRows(reportData, exporter);
+            exporter.write();
+            exporter.close();
+
+            return file;
+        } catch (Exception e) {
+            throw new ReportExporterException("Error exporting report " + report.getName(), e);
         }
     }
 
-    private List<ReportDataEntry> exportRows(ReportData reportData, ExcelFileWriter exporter) {
-        reportData.entries.each { data ->
-            exporter.newRow()
-            reportData.fieldNames.each { f ->
-                ReportField reportField = report.fields.find { it.name == f }
-                def value = data.values[f]
-
-                exporter.addCell(value)
+    private void exportRows(ReportData reportData, ExcelFileWriter exporter) {
+        for (ReportDataEntry data : reportData.getEntries()) {
+            exporter.newRow();
+            for (String f : reportData.getFieldNames()) {
+                ReportField reportField = report.getFields().stream().filter(field -> field.getName().equals(f)).findFirst().orElse(null);
+                Object value = data.getValues().get(f);
+                exporter.addCell(value);
             }
         }
     }
 
     private void exportColumns(ReportData reportData, ExcelFileWriter exporter) {
-        if (report.autofields) {
-            reportData.fieldNames.each { f ->
-                ReportField reportField = report.fields.find { it.name == f }
+        if (report.isAutofields()) {
+            for (String f : reportData.getFieldNames()) {
+                ReportField reportField = report.getFields().stream().filter(field -> field.getName().equals(f)).findFirst().orElse(null);
                 if (reportField != null) {
-                    exporter.addCell(reportField.label)
+                    exporter.addCell(reportField.getLabel());
                 } else {
-                    exporter.addCell(StringUtils.capitalizeAllWords(StringUtils.addSpaceBetweenWords(f)))
+                    exporter.addCell(StringUtils.capitalizeAllWords(StringUtils.addSpaceBetweenWords(f)));
                 }
             }
         } else {
-            report.fields.toSorted { a, b -> a.order <=> b.order }.each { f ->
-                exporter.addCell(f.label)
-            }
+            report.getFields().stream().sorted(Comparator.comparingInt(ReportField::getOrder)).forEach(f -> exporter.addCell(f.getLabel()));
         }
     }
 }

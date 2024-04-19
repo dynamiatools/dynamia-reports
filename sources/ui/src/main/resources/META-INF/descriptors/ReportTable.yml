@@ -9,6 +9,8 @@ fields:
   dataSourceConfig:
   autofields:
   chartable:
+  exportEndpoint:
+  endpointName:
   active:
   accountId:
     label: Account

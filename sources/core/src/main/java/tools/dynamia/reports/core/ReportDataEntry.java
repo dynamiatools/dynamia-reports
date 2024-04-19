@@ -1,5 +1,7 @@
 package tools.dynamia.reports.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.DynamicComparator;
 import tools.dynamia.domain.jdbc.Row;
@@ -9,11 +11,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReportDataEntry {
 
     private String name;
     private Object value;
+
     private Map<String, Object> values = new HashMap<>();
+    @JsonIgnore
     private boolean singleValue;
 
     public ReportDataEntry() {

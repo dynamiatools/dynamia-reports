@@ -20,12 +20,12 @@ public class DynamiaReportsApplication {
 
     @Bean
     public ModuleProvider dynamiaReportsModule() {
-        return () -> new DynamiaReportsModule("reports", "Design Reports", "");
+        return () -> new DynamiaReportsModule("reports", "Design Reports", "", 1);
     }
 
     @Bean
     public ModuleProvider dynamiaReportsUserModule() {
-        return () -> new DynamiaReportsUserModule("view", "View Reports");
+        return () -> new DynamiaReportsUserModule("view", "View Reports", 0);
     }
 
 }

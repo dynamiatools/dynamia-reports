@@ -1,51 +1,71 @@
 package tools.dynamia.reports.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import tools.dynamia.reports.core.domain.ReportFilter;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class ReportFilters {
 
 
-    private Map<String, Object> values = new HashMap<>();
-    private Map<String, ReportFilter> filters = new HashMap<>();
+    private List<ReportFilterOption> options = new ArrayList<>();
+
+    public ReportFilters() {
+    }
+
+    public ReportFilters(List<ReportFilterOption> options) {
+        this.options = options;
+    }
 
     public void add(ReportFilter filter, Object value) {
-        values.put(filter.getName(), value);
-        filters.put(filter.getName(), filter);
+        if (exists(filter.getName())) {
+            options.stream().filter(f -> f.getName().equals(filter.getName())).findFirst().ifPresent(op -> {
+                op.setValue(value);
+            });
+        } else {
+            options.add(new ReportFilterOption(filter, filter.getName(), value));
+        }
     }
 
     public Object getValue(String filterName) {
-        return values.get(filterName);
+        return options.stream().filter(f -> f.getName().equals(filterName))
+                .map(ReportFilterOption::getValue)
+                .findFirst().orElse(null);
     }
 
     public ReportFilter getFilter(String filterName) {
-        return filters.get(filterName);
+        return options.stream().filter(f -> f.getName().equals(filterName))
+                .map(ReportFilterOption::getFilter)
+                .findFirst().orElse(null);
     }
 
+    @JsonIgnore
     public boolean isEmpty() {
-        return values.isEmpty();
+        return options.isEmpty();
     }
 
+    public boolean exists(String filterName) {
+        return options.stream().anyMatch(f -> f.getName().equals(filterName));
+    }
+
+    @JsonIgnore
     public Set<String> getFiltersNames() {
-        return values.keySet();
+        return options.stream().map(ReportFilterOption::getName).collect(Collectors.toSet());
     }
 
+    @JsonIgnore
     public Map<String, Object> getValues() {
+        Map<String, Object> values = new HashMap<>();
+        options.forEach(f -> values.put(f.getName(), f.getValue()));
         return values;
     }
 
-    public void setValues(Map<String, Object> values) {
-        this.values = values;
+    public List<ReportFilterOption> getOptions() {
+        return options;
     }
 
-    public Map<String, ReportFilter> getFilters() {
-        return filters;
-    }
-
-    public void setFilters(Map<String, ReportFilter> filters) {
-        this.filters = filters;
+    public void setOptions(List<ReportFilterOption> options) {
+        this.options = options;
     }
 }

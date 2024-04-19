@@ -34,6 +34,8 @@ fields:
       mode: sql
       span: 4
       height: '400px !important'
+  exportEndpoint:
+  endpointName:
 
   filters:
     component: crudview

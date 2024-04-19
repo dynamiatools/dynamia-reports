@@ -86,6 +86,11 @@
             <artifactId>tools.dynamia.reports.ui</artifactId>
             <version>2.2.0</version>
         </dependency>
+        <dependency>
+            <groupId>tools.dynamia.modules</groupId>
+            <artifactId>tools.dynamia.modules.security.ui</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -16,4 +16,6 @@ public interface ReportsService {
     List<Report> findActives();
 
     List<Report> findActivesByGroup(ReportGroup reportGroup);
+
+    Report findByEndpoint(String endpoint);
 }

@@ -148,4 +148,9 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
                 .add("active", true)
                 .add("accountId", accountServiceAPI.getSystemAccountId()).orderBy("name"));
     }
+
+    @Override
+    public Report findByEndpoint(String endpoint) {
+        return crudService().findSingle(Report.class, QueryParameters.with("endpointName", QueryConditions.eq(endpoint)));
+    }
 }

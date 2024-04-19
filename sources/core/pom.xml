@@ -63,6 +63,21 @@
             <artifactId>tools.dynamia.modules.saas.jpa</artifactId>
             <version>${saas.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.reports</artifactId>
+            <version>${dynamiatools.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>tools.dynamia</groupId>
+            <artifactId>tools.dynamia.templates</artifactId>
+            <version>${dynamiatools.version}</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 </project>

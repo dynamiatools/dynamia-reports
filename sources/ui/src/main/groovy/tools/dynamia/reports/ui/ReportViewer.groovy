@@ -38,6 +38,8 @@ import tools.dynamia.domain.ValidationError
 import tools.dynamia.domain.query.QueryCondition
 import tools.dynamia.domain.query.QueryParameters
 import tools.dynamia.reports.api.EnumFilterProvider
+import tools.dynamia.reports.core.ExcelFormattedReportDataExporter
+import tools.dynamia.reports.core.ExcelReportDataExporter
 import tools.dynamia.reports.core.ReportData
 import tools.dynamia.reports.core.ReportFilterOption
 import tools.dynamia.reports.core.ReportFilters
@@ -354,10 +356,14 @@ class ReportViewer extends Div implements ActionEventBuilder {
     }
 
     def export() {
+        File file = null;
         if (report.exportWithoutFormat) {
-            new ExcelReportDataExporter(report).export(reportData)
+            file = new ExcelReportDataExporter(report).export(reportData)
         } else {
-            new ExcelFormattedReportDataExporter(report, filters).export(reportData)
+            file = new ExcelFormattedReportDataExporter(report, filters).export(reportData)
+        }
+        if (file != null) {
+            Filedownload.save(file, "application/excel")
         }
     }
 

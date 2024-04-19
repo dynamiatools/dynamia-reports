@@ -1,236 +1,225 @@
-/*
- * Copyright (C)  2020. Dynamia Soluciones IT S.A.S - NIT 900302344-1 All Rights Reserved.
- * Colombia - South America
- *
- * This file is free software: you can redistribute it and/or modify it  under the terms of the
- *  GNU Lesser General Public License (LGPL v3) as published by the Free Software Foundation,
- *   either version 3 of the License, or (at your option) any later version.
- *
- *  This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- *   without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *   See the GNU Lesser General Public License for more details. You should have received a copy of the
- *   GNU Lesser General Public License along with this file.
- *   If not, see <https://www.gnu.org/licenses/>.
- *
- */
+package tools.dynamia.reports.core;
 
-package tools.dynamia.reports.ui
+import org.apache.poi.ss.usermodel.BuiltinFormats;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.xssf.streaming.SXSSFRow;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import tools.dynamia.commons.DateTimeUtils;
+import tools.dynamia.commons.StringUtils;
+import tools.dynamia.domain.util.DomainUtils;
+import tools.dynamia.integration.Containers;
+import tools.dynamia.reports.ReportExporterException;
+import tools.dynamia.reports.api.ReportGlobalParameterProvider;
+import tools.dynamia.reports.core.domain.Report;
+import tools.dynamia.reports.core.domain.ReportField;
+import tools.dynamia.reports.core.domain.ReportFilter;
+import tools.dynamia.reports.core.domain.enums.DataType;
+import tools.dynamia.reports.core.domain.enums.TextAlign;
+import tools.dynamia.templates.SimpleTemplateEngine;
+import tools.dynamia.templates.TemplateEngine;
 
-import org.apache.poi.ss.usermodel.BuiltinFormats
-import org.apache.poi.ss.usermodel.CellType
-import org.apache.poi.ss.usermodel.HorizontalAlignment
-import org.apache.poi.xssf.streaming.SXSSFRow
-import org.apache.poi.xssf.streaming.SXSSFSheet
-import org.apache.poi.xssf.streaming.SXSSFWorkbook
-import org.zkoss.zul.Filedownload
-import tools.dynamia.commons.DateTimeUtils
-import tools.dynamia.commons.StringUtils
-import tools.dynamia.domain.util.DomainUtils
-import tools.dynamia.integration.Containers
-import tools.dynamia.reports.api.ReportGlobalParameterProvider
-import tools.dynamia.reports.core.ReportData
-import tools.dynamia.reports.core.ReportDataEntry
-import tools.dynamia.reports.core.ReportFilters
-import tools.dynamia.reports.core.domain.Report
-import tools.dynamia.reports.core.domain.ReportField
-import tools.dynamia.reports.core.domain.ReportFilter
-import tools.dynamia.reports.core.domain.enums.DataType
-import tools.dynamia.reports.core.domain.enums.TextAlign
-import tools.dynamia.templates.SimpleTemplateEngine
-import tools.dynamia.templates.TemplateEngine
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
-class ExcelFormattedReportDataExporter implements ReportDataExporter {
+public class ExcelFormattedReportDataExporter implements ReportDataExporter<File> {
 
-    public static final String DATE_PATTERN = "yyyy-MM-dd"
-    private Report report
-    private ReportFilters filters
+    public static final String DATE_PATTERN = "yyyy-MM-dd";
+    private Report report;
+    private ReportFilters filters;
     private Map<String, Object> globalParams = new HashMap<>();
 
-    private SXSSFWorkbook workbook
-    private SXSSFSheet sheet
+    private SXSSFWorkbook workbook;
+    private SXSSFSheet sheet;
 
 
-    ExcelFormattedReportDataExporter(Report report, ReportFilters filters) {
-        this.report = report
-        this.filters = filters
-        Containers.get().findObjects(ReportGlobalParameterProvider).each { globalParams.putAll(it.params) }
+
+    public ExcelFormattedReportDataExporter(Report report, ReportFilters filters) {
+        this.report = report;
+        this.filters = filters;
+        Containers.get().findObjects(ReportGlobalParameterProvider.class).forEach(provider -> globalParams.putAll(provider.getParams()));
     }
 
-    def export(ReportData reportData) {
-        if (reportData != null) {
-
-            def file = File.createTempFile(report.name.replace(" ", "_") + "_", ".xlsx")
+    public File export(ReportData reportData) {
+        try {
+            File file = File.createTempFile(report.getName().replace(" ", "_") + "_", ".xlsx");
             this.workbook = new SXSSFWorkbook(200);
             workbook.setCompressTempFiles(true);
 
-            sheet = workbook.createSheet(report.name);
-            sheet.createFreezePane(0, 5)
-            exportTitle()
-            exportFilters()
-            exportColumns(reportData)
-            exportRows(reportData)
-            workbook.write(new FileOutputStream(file))
-            workbook.close()
+            sheet = workbook.createSheet(report.getName());
+            sheet.createFreezePane(0, 5);
+            exportTitle();
+            exportFilters();
+            exportColumns(reportData);
+            exportRows(reportData);
+            workbook.write(new FileOutputStream(file));
+            workbook.close();
 
-            Filedownload.save(file, "application/excel")
+            return file;
+        } catch (Exception e) {
+            throw new ReportExporterException("Error exporting report " + report.getName(), e);
         }
     }
 
 
-    def exportTitle() {
+    private void exportTitle() {
 
-        def font = workbook.createFont()
-        font.bold = true
+        org.apache.poi.ss.usermodel.Font font = workbook.createFont();
+        font.setBold(true);
 
 
-        def style = workbook.createCellStyle()
-        style.font = font
+        org.apache.poi.ss.usermodel.CellStyle style = workbook.createCellStyle();
+        style.setFont(font);
 
-        def row = sheet.createRow(0)
-        def cell = row.createCell(0)
-        cell.cellType = CellType.STRING
-        cell.cellValue = report.name.toUpperCase()
-        cell.cellStyle = style
+        SXSSFRow row = sheet.createRow(0);
+        org.apache.poi.ss.usermodel.Cell cell = row.createCell(0);
+        cell.setCellType(CellType.STRING);
+        cell.setCellValue(report.getName().toUpperCase());
+        cell.setCellStyle(style);
 
-        row = sheet.createRow(1)
-        cell = row.createCell(0)
-        cell.cellType = CellType.STRING
+        row = sheet.createRow(1);
+        cell = row.createCell(0);
+        cell.setCellType(CellType.STRING);
 
-        String title = report.title
+        String title = report.getTitle();
         if (title == null) {
-            title = globalParams["DEFAULT_REPORT_TITLE"]
+            title = (String) globalParams.get("DEFAULT_REPORT_TITLE");
         }
-        cell.cellValue = parse(title)
-        cell.cellStyle = style
+        cell.setCellValue(parse(title));
+        cell.setCellStyle(style);
 
-        String subtitle = report.subtitle
+        String subtitle = report.getSubtitle();
         if (subtitle == null) {
-            subtitle = globalParams["DEFAULT_REPORT_SUBTITLE"]
+            subtitle = (String) globalParams.get("DEFAULT_REPORT_SUBTITLE");
         }
 
-        row = sheet.createRow(2)
-        cell = row.createCell(0)
-        cell.cellType = CellType.STRING
-        cell.cellValue = parse(subtitle)
-        cell.cellStyle = style
+        row = sheet.createRow(2);
+        cell = row.createCell(0);
+        cell.setCellType(CellType.STRING);
+        cell.setCellValue(parse(subtitle));
+        cell.setCellStyle(style);
     }
 
-    def addParam(String name, Object value) {
-        globalParams[name] = value
+    private void addParam(String name, Object value) {
+        globalParams.put(name, value);
     }
 
     private String parse(String s) {
         if (s != null) {
-            def engine = Containers.get().findObject(TemplateEngine)
+            TemplateEngine engine = Containers.get().findObject(TemplateEngine.class);
             if (engine == null) {
                 engine = new SimpleTemplateEngine();
             }
-            return engine.evaluate(s, globalParams)
+            return engine.evaluate(s, globalParams);
         } else {
-            return ""
+            return "";
         }
     }
 
-    def exportFilters() {
+    private void exportFilters() {
 
-        def font = workbook.createFont()
-        font.bold = true
+        org.apache.poi.ss.usermodel.Font font = workbook.createFont();
+        font.setBold(true);
 
 
-        def style = workbook.createCellStyle()
-        style.font = font
+        org.apache.poi.ss.usermodel.CellStyle style = workbook.createCellStyle();
+        style.setFont(font);
 
-        int lastCell = 0
-        def row = sheet.createRow(3)
+        int lastCell = 0;
+        SXSSFRow row = sheet.createRow(3);
 
-        report.filters.each { filter ->
-            def value = filters.getValue(filter.name)
+        for (ReportFilter filter : report.getFilters()) {
+            Object value = filters.getValue(filter.getName());
             if (filter != null && value != null) {
-                String filterValue = formatFilterValue(filter, value)
+                String filterValue = formatFilterValue(filter, value);
                 if (filterValue != null) {
-                    def label = row.createCell(lastCell++, CellType.STRING)
-                    label.cellValue = filter.label
-                    label.cellStyle = style
-                    row.createCell(lastCell++, CellType.STRING).cellValue = filterValue;
+                    org.apache.poi.ss.usermodel.Cell label = row.createCell(lastCell++, CellType.STRING);
+                    label.setCellValue(filter.getLabel());
+                    label.setCellStyle(style);
+                    row.createCell(lastCell++, CellType.STRING).setCellValue(filterValue);
                 }
             }
         }
     }
 
-    String formatFilterValue(ReportFilter filter, Object value) {
+    private String formatFilterValue(ReportFilter filter, Object value) {
         if (value instanceof String) {
-            return value
+            return (String) value;
         } else if (value instanceof Date) {
-            return DateTimeUtils.format(value, DATE_PATTERN)
-        } else if (value instanceof Number && filter.dataType == DataType.ENTITY) {
-            return loadEntityFilter(value.longValue(), filter.entityClassName)
+            return DateTimeUtils.format((Date) value, DATE_PATTERN);
+        } else if (value instanceof Number && filter.getDataType() == DataType.ENTITY) {
+            return loadEntityFilter(((Number) value).longValue(), filter.getEntityClassName());
         } else if (DomainUtils.isEntity(value) || value instanceof Enum) {
-            return value.toString()
-        } else if (filter.dataType == DataType.ENUM) {
-            return value.toString()
+            return value.toString();
+        } else if (filter.getDataType() == DataType.ENUM) {
+            return value.toString();
         }
 
 
-        return null
+        return null;
     }
 
-    String loadEntityFilter(long id, String className) {
+    private String loadEntityFilter(long id, String className) {
         try {
-            Class clazz = Class.forName(className)
-            return DomainUtils.lookupCrudService().find(clazz, (Long) id)?.toString()
+            Class<?> clazz = Class.forName(className);
+            return DomainUtils.lookupCrudService().find(clazz, id).toString();
         } catch (Exception e) {
-            e.printStackTrace()
-            return null
+            e.printStackTrace();
+            return null;
         }
     }
 
-    private List<ReportDataEntry> exportRows(ReportData reportData) {
-        int rowNum = 5
+    private void exportRows(ReportData reportData) {
+        int rowNum = 5;
 
-        def currencyStyle = workbook.createCellStyle()
-        currencyStyle.alignment = HorizontalAlignment.RIGHT
-        currencyStyle.dataFormat = workbook.createDataFormat().getFormat(BuiltinFormats.getBuiltinFormat(6))
+        org.apache.poi.ss.usermodel.CellStyle currencyStyle = workbook.createCellStyle();
+        currencyStyle.setAlignment(HorizontalAlignment.RIGHT);
+        currencyStyle.setDataFormat(workbook.createDataFormat().getFormat(BuiltinFormats.getBuiltinFormat(6)));
 
-        def dateStyle = workbook.createCellStyle()
-        dateStyle.dataFormat = workbook.createDataFormat().getFormat("yyyy-mm-dd")
+        org.apache.poi.ss.usermodel.CellStyle dateStyle = workbook.createCellStyle();
+        dateStyle.setDataFormat(workbook.createDataFormat().getFormat("yyyy-mm-dd"));
 
-        def centerStyle = workbook.createCellStyle()
-        centerStyle.alignment = HorizontalAlignment.CENTER
+        org.apache.poi.ss.usermodel.CellStyle centerStyle = workbook.createCellStyle();
+        centerStyle.setAlignment(HorizontalAlignment.CENTER);
 
 
-        reportData.entries.each { data ->
-            def row = sheet.createRow(rowNum++)
-            def colNum = 0
-            reportData.fieldNames.each { f ->
-                def cell = row.createCell(colNum++)
+        for (ReportDataEntry data : reportData.getEntries()) {
+            SXSSFRow row = sheet.createRow(rowNum++);
+            int colNum = 0;
+            for (String f : reportData.getFieldNames()) {
+                org.apache.poi.ss.usermodel.Cell cell = row.createCell(colNum++);
 
-                ReportField reportField = report.fields.find { it.name == f }
-                def value = data.values[f]
+                ReportField reportField = report.getFields().stream().filter(field -> field.getName().equals(f)).findFirst().orElse(null);
+                Object value = data.getValues().get(f);
                 if (value == null) {
-                    value = ""
+                    value = "";
                 }
 
                 if (value instanceof Number) {
-                    cell.cellType = CellType.NUMERIC
-                    cell.cellValue = value as Double
+                    cell.setCellType(CellType.NUMERIC);
+                    cell.setCellValue((Double) value);
                 } else if (value instanceof Date) {
-                    cell.cellType = CellType.STRING
-                    cell.cellValue = value as Date
-                    cell.cellStyle = dateStyle
+                    cell.setCellType(CellType.STRING);
+                    cell.setCellValue((Date) value);
+                    cell.setCellStyle(dateStyle);
                 } else {
-                    cell.cellType = CellType.STRING
-                    cell.cellValue = value.toString()
+                    cell.setCellType(CellType.STRING);
+                    cell.setCellValue(value.toString());
                 }
 
-                if (reportField?.dataType == DataType.CURRENCY) {
-                    if (reportField.format != null) {
-                        currencyStyle.dataFormat = workbook.createDataFormat().getFormat(reportField.format)
+                if (reportField != null && reportField.getDataType() == DataType.CURRENCY) {
+                    if (reportField.getFormat() != null) {
+                        currencyStyle.setDataFormat(workbook.createDataFormat().getFormat(reportField.getFormat()));
                     }
-                    cell.cellStyle = currencyStyle
+                    cell.setCellStyle(currencyStyle);
                 }
 
-                if (reportField?.align == TextAlign.CENTER) {
-                    cell.cellStyle = centerStyle
+                if (reportField != null && reportField.getAlign() == TextAlign.CENTER) {
+                    cell.setCellStyle(centerStyle);
                 }
 
             }
@@ -239,40 +228,40 @@ class ExcelFormattedReportDataExporter implements ReportDataExporter {
 
     private void exportColumns(ReportData reportData) {
 
-        def row = sheet.createRow(4)
-        if (report.autofields) {
-            int column = 0
-            reportData.fieldNames.each { f ->
-                ReportField reportField = report.fields.find { it.name == f }
+        SXSSFRow row = sheet.createRow(4);
+        if (report.isAutofields()) {
+            int column = 0;
+            for (String f : reportData.getFieldNames()) {
+                ReportField reportField = report.getFields().stream().filter(field -> field.getName().equals(f)).findFirst().orElse(null);
 
                 if (reportField != null) {
-                    addColumn(reportField.label, reportField.align, column++, row)
+                    addColumn(reportField.getLabel(), reportField.getAlign(), column++, row);
                 } else {
-                    String label = StringUtils.capitalizeAllWords(StringUtils.addSpaceBetweenWords(f))
-                    addColumn(label, TextAlign.LEFT, column++, row)
+                    String label = StringUtils.capitalizeAllWords(StringUtils.addSpaceBetweenWords(f));
+                    addColumn(label, TextAlign.LEFT, column++, row);
                 }
             }
         } else {
-            int column = 0
-            report.fields.toSorted { a, b -> a.order <=> b.order }.each { f ->
-                addColumn(f.label, f.align, column++, row)
+            int column = 0;
+            for (ReportField f : report.getFields()) {
+                addColumn(f.getLabel(), f.getAlign(), column++, row);
             }
         }
     }
 
     private void addColumn(String title, TextAlign align, int index, SXSSFRow row) {
-        def cell = row.createCell(index, CellType.STRING)
-        cell.cellValue = title
+        org.apache.poi.ss.usermodel.Cell cell = row.createCell(index, CellType.STRING);
+        cell.setCellValue(title);
 
-        def style = workbook.createCellStyle()
-        style.alignment = HorizontalAlignment.valueOf(align.name())
+        org.apache.poi.ss.usermodel.CellStyle style = workbook.createCellStyle();
+        style.setAlignment(HorizontalAlignment.valueOf(align.name()));
 
 
-        def font = workbook.createFont()
-        font.bold = true
-        style.font = font
+        org.apache.poi.ss.usermodel.Font font = workbook.createFont();
+        font.setBold(true);
+        style.setFont(font);
 
-        cell.cellStyle = style
+        cell.setCellStyle(style);
 
 
     }

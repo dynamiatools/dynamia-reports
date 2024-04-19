@@ -34,7 +34,11 @@ class DynamiaReportsModule extends Module {
     private Page reportDatasourcesPage
 
 
-    DynamiaReportsModule(String id, String name, String description) {
+    DynamiaReportsModule(String id, String name, String description){
+        this(id,name,description,Double.MAX_VALUE)
+    }
+
+    DynamiaReportsModule(String id, String name, String description, double  position) {
         super(id, name, description)
 
         this.reportGroupsPage = new CrudPage("groups", "Reports Groups", ReportGroup.class)
@@ -47,6 +51,8 @@ class DynamiaReportsModule extends Module {
         addPage(reportDesignPage)
         addPage(reportDatasourcesPage)
         addPage(reportViewerPage)
+        setIcon("report")
+        setPosition(position)
     }
 
     Page getReportGroupsPage() {

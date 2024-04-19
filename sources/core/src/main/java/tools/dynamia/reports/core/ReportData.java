@@ -1,15 +1,21 @@
 package tools.dynamia.reports.core;
 
-import java.util.*;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import tools.dynamia.domain.jdbc.JdbcDataSet;
 import tools.dynamia.reports.core.domain.Report;
 import tools.dynamia.reports.core.domain.ReportField;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 public class ReportData {
 
+    @JsonIgnore
     private Report report;
     private List<ReportDataEntry> entries = new ArrayList<>();
+    @JsonIgnore
     private List<String> fieldNames;
 
     public static ReportData build(Report report, JdbcDataSet dataSet) {
@@ -64,4 +70,6 @@ public class ReportData {
     public List<String> getFieldNames() {
         return fieldNames;
     }
+
+
 }

@@ -32,6 +32,7 @@ public class ReportField extends SimpleEntitySaaS {
     private String cellStyle;
     private String columnStyle;
     private boolean upperCase;
+    private String jsonPath;
 
 
 
@@ -140,4 +141,11 @@ public class ReportField extends SimpleEntitySaaS {
         this.upperCase = upperCase;
     }
 
+    public String getJsonPath() {
+        return jsonPath;
+    }
+
+    public void setJsonPath(String jsonPath) {
+        this.jsonPath = jsonPath;
+    }
 }

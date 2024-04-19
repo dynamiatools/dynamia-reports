@@ -188,6 +188,9 @@ public class Report extends SimpleEntitySaaS {
     }
 
     public Boolean getExportWithoutFormat() {
+        if (exportWithoutFormat == null) {
+            exportWithoutFormat = false;
+        }
         return exportWithoutFormat;
     }
 
@@ -196,6 +199,9 @@ public class Report extends SimpleEntitySaaS {
     }
 
     public Boolean getExportEndpoint() {
+        if (exportEndpoint == null) {
+            exportEndpoint = false;
+        }
         return exportEndpoint;
     }
 
