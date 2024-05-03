@@ -2,6 +2,7 @@ package tools.dynamia.reports.core.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import tools.dynamia.modules.saas.jpa.SimpleEntitySaaS;
 
@@ -12,9 +13,11 @@ public class ReportDataSourceConfig extends SimpleEntitySaaS {
     @NotNull
     private String name;
 
+    @NotEmpty
     private String url;
     private String username;
     private String password;
+    @NotEmpty
     private String driverClassName;
 
     public String getName() {

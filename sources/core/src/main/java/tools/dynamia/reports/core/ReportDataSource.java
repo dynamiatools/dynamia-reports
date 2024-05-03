@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.AbstractDataSource;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import tools.dynamia.domain.ValidatorUtil;
 import tools.dynamia.domain.jdbc.JdbcHelper;
 import tools.dynamia.reports.core.domain.ReportDataSourceConfig;
 
@@ -50,16 +51,23 @@ public class ReportDataSource extends AbstractDataSource {
     }
 
     public static Connection newConnection(ReportDataSourceConfig config) {
+        ValidatorUtil.validateEmpty(config.getDriverClassName(), "Select datasource driver class");
+        ValidatorUtil.validateEmpty(config.getUrl(), "Enter datasource jdbc valid URL");
+
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName(config.getDriverClassName());
         dataSource.setUrl(config.getUrl());
-        dataSource.setUsername(config.getUsername());
-        dataSource.setPassword(config.getPassword());
+        if (config.getUsername() != null && !config.getUsername().isBlank()) {
+            dataSource.setUsername(config.getUsername());
+        }
+        if (config.getPassword() != null && !config.getPassword().isBlank()) {
+            dataSource.setPassword(config.getPassword());
+        }
 
         try {
             return dataSource.getConnection();
         } catch (SQLException e) {
-            throw new ReportsException("Cannot create database connection using datasource: " + config.getName());
+            throw new ReportsException("Cannot create database connection using datasource: " + config.getName() + ". " + e.getMessage());
         }
     }
 

@@ -17,7 +17,7 @@ import java.util.List;
 public class Report extends SimpleEntitySaaS {
 
 
-    @OneToOne
+    @ManyToOne
     @NotNull
     private ReportGroup group;
     private String name;

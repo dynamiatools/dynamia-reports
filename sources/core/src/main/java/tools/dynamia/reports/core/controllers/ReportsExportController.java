@@ -3,11 +3,9 @@ package tools.dynamia.reports.core.controllers;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tools.dynamia.commons.BeanUtils;
 import tools.dynamia.commons.DateTimeUtils;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.reports.core.NestedMapReportDataExporter;
-import tools.dynamia.reports.core.ReportData;
 import tools.dynamia.reports.core.ReportFilters;
 import tools.dynamia.reports.core.ReportsUtils;
 import tools.dynamia.reports.core.domain.Report;
@@ -33,30 +31,37 @@ public class ReportsExportController {
 
     @PostMapping(value = "/reports/{endpoint}", produces = "application/json")
     public ResponseEntity<Map<String, Object>> getReport(@PathVariable("endpoint") String endpoint, @RequestBody(required = false) ReportFilters filters) {
-        Report report = reportsService.findByEndpoint(endpoint);
-        if (report == null) {
-            return ResponseEntity.notFound().build();
+        try {
+            Report report = reportsService.findByEndpoint(endpoint);
+            if (report == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            if (!report.isActive()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .header("X-Error-Message", "Report [" + report.getName() + "] is not active")
+                        .body(Map.of("error", "Report [" + report.getName() + "] is not active", "valid", false));
+
+            }
+
+            if (!report.getExportEndpoint()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .header("X-Error-Message", "Report [" + report.getName() + "] is not exported as endpoint")
+                        .body(Map.of("error", "Report [" + report.getName() + "] is not exported as endpoint", "valid", false));
+            }
+
+            var loadedFilters = loadFilters(report, filters);
+            var datasource = ReportsUtils.findDatasource(report);
+
+            var reportData = reportsService.execute(report, loadedFilters, datasource);
+            var map = new NestedMapReportDataExporter().export(reportData);
+
+            return ResponseEntity.ok(map);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .header("X-Error-Message", "Endpoint [" + endpoint + "] error: " + e.getMessage())
+                    .body(Map.of("error", "Endpoint [" + endpoint + "] error: " + e.getMessage(), "valid", false));
         }
-
-        if (!report.isActive()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .header("X-Error-Message", "Report [" + report.getName() + "] is not active")
-                    .build();
-        }
-
-        if (!report.getExportEndpoint()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .header("X-Error-Message", "Report [" + report.getName() + "] is not exported as endpoint")
-                    .build();
-        }
-
-        var loadedFilters = loadFilters(report, filters);
-        var datasource = ReportsUtils.findDatasource(report);
-
-        var reportData = reportsService.execute(report, loadedFilters, datasource);
-        var map = new NestedMapReportDataExporter().export(reportData);
-
-        return ResponseEntity.ok(map);
 
     }
 
