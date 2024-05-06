@@ -1,5 +1,6 @@
 package tools.dynamia.reports.ui.actions;
 
+import org.zkoss.zul.Messagebox;
 import tools.dynamia.actions.InstallAction;
 import tools.dynamia.crud.AbstractCrudAction;
 import tools.dynamia.crud.CrudActionEvent;
@@ -19,8 +20,14 @@ public class TestReportDatasourceAction extends AbstractCrudAction {
     @Override
     public void actionPerformed(CrudActionEvent evt) {
         var config = (ReportDataSourceConfig) evt.getData();
-        if(config!=null){
+        if (config != null) {
             var connection = ReportDataSource.newConnection(config);
+
+            try {
+                Messagebox.show("Connection: " + connection.isValid(1000));
+            } catch (Exception e) {
+                Messagebox.show(e.getMessage(), "Error", Messagebox.OK, Messagebox.ERROR);
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-view: form
+view: table
 beanClass: tools.dynamia.reports.core.domain.ReportGroup
 autofields: false
 
