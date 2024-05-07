@@ -199,15 +199,12 @@ public class ExcelFormattedReportDataExporter implements ReportDataExporter<File
                     value = "";
                 }
 
-                if (value instanceof Number) {
-                    cell.setCellType(CellType.NUMERIC);
-                    cell.setCellValue((Double) value);
-                } else if (value instanceof Date) {
-                    cell.setCellType(CellType.STRING);
-                    cell.setCellValue((Date) value);
+                if (value instanceof Number number) {
+                    cell.setCellValue(number.doubleValue());
+                } else if (value instanceof Date date) {
+                    cell.setCellValue(date);
                     cell.setCellStyle(dateStyle);
                 } else {
-                    cell.setCellType(CellType.STRING);
                     cell.setCellValue(value.toString());
                 }
 
