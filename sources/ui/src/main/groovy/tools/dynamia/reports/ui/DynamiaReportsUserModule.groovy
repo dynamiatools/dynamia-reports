@@ -40,6 +40,11 @@ class DynamiaReportsUserModule extends Module {
     }
 
     @Override
+    String getIcon() {
+        return "list";
+    }
+
+    @Override
     List<PageGroup> getPageGroups() {
         init()
         return super.getPageGroups()
