@@ -15,7 +15,7 @@
     <description>Very simple report builder</description>
     <properties>
         <java.version>17</java.version>
-        <dynamiatools.version>5.1.0</dynamiatools.version>
+        <dynamiatools.version>5.1.1</dynamiatools.version>
     </properties>
     <dependencies>
         <dependency>
