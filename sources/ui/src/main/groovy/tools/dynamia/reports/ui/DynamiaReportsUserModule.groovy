@@ -29,8 +29,19 @@ class DynamiaReportsUserModule extends Module {
         super(id, name)
     }
 
+    DynamiaReportsUserModule(String id, String name, double position) {
+        super(id, name)
+        setPosition(position)
+    }
+
+
     DynamiaReportsUserModule() {
 
+    }
+
+    @Override
+    String getIcon() {
+        return "list";
     }
 
     @Override

@@ -16,25 +16,15 @@
 package tools.dynamia.reports.ui.actions
 
 import org.springframework.beans.factory.annotation.Autowired
-import tools.dynamia.actions.FastAction
 import tools.dynamia.actions.InstallAction
 import tools.dynamia.commons.Messages
 import tools.dynamia.crud.AbstractCrudAction
 import tools.dynamia.crud.CrudActionEvent
 import tools.dynamia.crud.CrudState
-import tools.dynamia.integration.Containers
 import tools.dynamia.navigation.NavigationManager
-import tools.dynamia.reports.core.ReportsUtils
 import tools.dynamia.reports.core.domain.Report
 import tools.dynamia.reports.core.services.ReportsService
-import tools.dynamia.reports.core.services.impl.ReportDataSource
 import tools.dynamia.reports.ui.ReportPage
-import tools.dynamia.reports.ui.ReportViewer
-import tools.dynamia.ui.UIMessages
-import tools.dynamia.zk.navigation.ComponentPage
-
-import jakarta.persistence.EntityManagerFactory
-import javax.sql.DataSource
 
 @InstallAction
 class ViewReportAction extends AbstractCrudAction {

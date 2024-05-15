@@ -6,8 +6,11 @@ fields:
   name:
   group:
   description:
+  dataSourceConfig:
   autofields:
   chartable:
+  exportEndpoint:
+  endpointName:
   active:
   accountId:
     label: Account
