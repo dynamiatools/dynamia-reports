@@ -151,6 +151,12 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
 
     @Override
     public Report findByEndpoint(String endpoint) {
-        return crudService().findSingle(Report.class, QueryParameters.with("endpointName", QueryConditions.eq(endpoint)));
+        var report = crudService().findSingle(Report.class, QueryParameters.with("endpointName", QueryConditions.eq(endpoint)));
+        if (report == null) {
+            //if not fount try to find report in system account
+            report = crudService().findSingle(Report.class, QueryParameters.with("endpointName", QueryConditions.eq(endpoint))
+                    .add("accountId", accountServiceAPI.getSystemAccountId()));
+        }
+        return report;
     }
 }
