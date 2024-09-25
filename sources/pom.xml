@@ -70,7 +70,6 @@
         <module>api</module>
         <module>core</module>
         <module>ui</module>
-        <module>boot</module>
     </modules>
 
 
@@ -152,6 +151,7 @@
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
+
 
     <profiles>
         <profile>
