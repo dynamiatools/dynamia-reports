@@ -13,56 +13,67 @@
  *   If not, see <https://www.gnu.org/licenses/>.
  *
  */
-package tools.dynamia.reports.ui
+package tools.dynamia.reports.ui;
 
-import org.zkoss.bind.annotation.BindingParam
-import org.zkoss.bind.annotation.Command
-import org.zkoss.bind.annotation.Init
-import tools.dynamia.integration.Containers
-import tools.dynamia.navigation.ModuleContainer
-import tools.dynamia.navigation.NavigationRestrictions
-import tools.dynamia.reports.core.Reports
-import tools.dynamia.reports.core.domain.Report
-import tools.dynamia.reports.core.domain.ReportGroup
-import tools.dynamia.reports.ui.actions.ViewReportAction
+import org.zkoss.bind.annotation.BindingParam;
+import org.zkoss.bind.annotation.Command;
+import org.zkoss.bind.annotation.Init;
+import tools.dynamia.integration.Containers;
+import tools.dynamia.navigation.Module;
+import tools.dynamia.navigation.ModuleContainer;
+import tools.dynamia.navigation.NavigationRestrictions;
+import tools.dynamia.reports.core.Reports;
+import tools.dynamia.reports.core.domain.Report;
+import tools.dynamia.reports.ui.actions.ViewReportAction;
 
-class ReportListViewModel {
+import java.util.ArrayList;
+import java.util.List;
 
-    List<Reports> reports
-    ViewReportAction action = Containers.get().findObject(ViewReportAction)
+public class ReportListViewModel {
+
+    private List<Reports> reports;
+    private ViewReportAction action = Containers.get().findObject(ViewReportAction.class);
 
     @Init
-    def init() {
-        loadReports()
+    public boolean init() {
+        return loadReports();
     }
 
-    def loadReports() {
-        reports = Reports.loadAll()
+    public boolean loadReports() {
+        reports = Reports.loadAll();
 
-        filterReportsByModules()
+        return filterReportsByModules();
     }
 
-    def filterReportsByModules() {
-        def modules = Containers.get().findObject(ModuleContainer)
-        def toRemove = []
-        reports.each { r ->
-            if (r.group.module != null && !r.group.module.empty) {
-                def module = modules.getModuleById(r.group.module)
+    public boolean filterReportsByModules() {
+        final ModuleContainer modules = Containers.get().findObject(ModuleContainer.class);
+        final List<Reports> toRemove = new ArrayList<>();
+        reports.forEach(r -> {
+            if (r.getGroup().getModule() != null && !r.getGroup().getModule().isEmpty()) {
+                Module module = modules.getModuleById(r.getGroup().getModule());
                 if (module != null && !NavigationRestrictions.allowAccess(module)) {
-                    toRemove << r
+                    toRemove.add(r);
                 }
+
             }
-        }
-        reports.removeAll(toRemove)
+        });
+
+        return reports.removeAll(toRemove);
     }
-
-
 
     @Command
-    def viewReport(@BindingParam("report") Report report) {
+    public void viewReport(@BindingParam("report") Report report) {
         if (report != null) {
-
-            action.view(report, false)
+            action.view(report, false);
         }
     }
+
+    public List<Reports> getReports() {
+        return reports;
+    }
+
+    public void setReports(List<Reports> reports) {
+        this.reports = reports;
+    }
+
 }

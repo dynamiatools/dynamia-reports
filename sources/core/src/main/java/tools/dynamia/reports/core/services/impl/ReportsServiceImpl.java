@@ -1,6 +1,7 @@
 package tools.dynamia.reports.core.services.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Propagation;
@@ -17,9 +18,6 @@ import tools.dynamia.reports.core.domain.ReportFilter;
 import tools.dynamia.reports.core.domain.ReportGroup;
 import tools.dynamia.reports.core.services.ReportsService;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,8 +28,12 @@ import java.util.Objects;
 @CacheConfig(cacheNames = "reports")
 public class ReportsServiceImpl extends AbstractService implements ReportsService {
 
-    @Autowired
-    private AccountServiceAPI accountServiceAPI;
+
+    private final AccountServiceAPI accountServiceAPI;
+
+    public ReportsServiceImpl(AccountServiceAPI accountServiceAPI) {
+        this.accountServiceAPI = accountServiceAPI;
+    }
 
     @Override
     public ReportData execute(Report report, ReportFilters filters, ReportDataSource datasource) {
@@ -39,14 +41,11 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
         long start = System.currentTimeMillis();
         ReportData data = null;
         loadDefaultFilters(report, filters);
-        switch (report.getQueryLang()) {
-            case "sql":
-                data = executeSQL(report, filters, datasource);
-                break;
-            case "jpql":
-                data = executeJPQL(report, filters, datasource);
-                break;
-        }
+        data = switch (report.getQueryLang()) {
+            case "sql" -> executeSQL(report, filters, datasource);
+            case "jpql" -> executeJPQL(report, filters, datasource);
+            default -> data;
+        };
         long end = System.currentTimeMillis();
         log("Report " + report.getName() + " executed in " + (end - start) + "ms");
         return data;

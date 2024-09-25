@@ -40,7 +40,7 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
-                     <encoding>${source.encoding}</encoding>
+                    <encoding>${source.encoding}</encoding>
                     <parameters>true</parameters>
                 </configuration>
             </plugin>
@@ -78,6 +78,11 @@
             <artifactId>tools.dynamia.templates</artifactId>
             <version>${dynamiatools.version}</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

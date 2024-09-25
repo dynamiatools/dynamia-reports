@@ -226,6 +226,9 @@ public class ReportFilter extends SimpleEntitySaaS {
     }
 
     public Boolean getHideLabel() {
+        if (hideLabel == null) {
+            hideLabel = false;
+        }
         return hideLabel;
     }
 

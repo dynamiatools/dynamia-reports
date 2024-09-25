@@ -253,20 +253,18 @@ class ReportViewer extends Div implements ActionEventBuilder {
     def initDataView() {
         dataView = new Listbox()
         dataView.sclass = "table-view"
-        dataView.with {
-            appendChild(new Listhead())
-            appendChild(new Listfoot())
-            vflex = "1"
-            hflex = "1"
-            mold = "paging"
-            sizedByContent = true
-        }
+        dataView.appendChild(new Listhead())
+        dataView.appendChild(new Listfoot())
+        dataView.vflex = "1"
+        dataView.hflex = "1"
+        dataView.mold = "paging"
+        dataView.sizedByContent = true
 
         addColumnNumber()
 
         if (!report.autofields) {
 
-            report.fields.toSorted { a, b -> a.order <=> b.order }.each { f ->
+            report.fields.sort { a, b -> a.order <=> b.order }.forEach { f ->
                 Listheader col = new Listheader(f.label)
                 col.sortAscending = new FieldComparator(f.name, true)
                 col.sortDescending = new FieldComparator(f.name, false)
@@ -326,11 +324,10 @@ class ReportViewer extends Div implements ActionEventBuilder {
                 e.printStackTrace()
             }
         }
-
     }
 
     def validate(QueryParameters params) {
-        def requiredFilters = report.filters.findAll { it.required }
+        def requiredFilters = report.getRequiredFilters();
         def filter = requiredFilters.find { !params.containsKey(it.name) }
         if (filter != null) {
             throw new ValidationError(messages.get("errorfiltersRequired", filter.label))
@@ -374,7 +371,7 @@ class ReportViewer extends Div implements ActionEventBuilder {
         dataView.items.clear()
         def totals = [:]
         def count = 0
-        reportData.entries.each { data ->
+        reportData.entries.forEach { data ->
             def row = new Listitem()
             dataView.appendChild(row)
 
@@ -384,7 +381,7 @@ class ReportViewer extends Div implements ActionEventBuilder {
             cellCount.setStyle("font-weight: bold")
             cellCount.setParent(row)
 
-            fieldsNames.each { String fieldName ->
+            fieldsNames.forEach { fieldName ->
                 Object cellData = data.values[fieldName]
 
                 //Compute Totales
@@ -428,7 +425,7 @@ class ReportViewer extends Div implements ActionEventBuilder {
         }
 
         //render totals
-        totals.entrySet().each { entry ->
+        totals.entrySet().forEach { entry ->
             Listfooter footer = dataView.listfoot.children.find {
                 ((Listfooter) it).attributes["reportFieldName"] == entry.key
             }

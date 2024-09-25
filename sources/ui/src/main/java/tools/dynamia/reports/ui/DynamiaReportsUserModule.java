@@ -13,58 +13,56 @@
  *   If not, see <https://www.gnu.org/licenses/>.
  *
  */
-package tools.dynamia.reports.ui
+package tools.dynamia.reports.ui;
 
+import tools.dynamia.navigation.Module;
+import tools.dynamia.navigation.PageGroup;
 
-import tools.dynamia.navigation.Module
-import tools.dynamia.navigation.PageGroup
+import java.util.List;
 
-class DynamiaReportsUserModule extends Module {
-
-    DynamiaReportsUserModule(String id, String name, String description) {
-        super(id, name, description)
+public class DynamiaReportsUserModule extends Module {
+    public DynamiaReportsUserModule(String id, String name, String description) {
+        super(id, name, description);
     }
 
-    DynamiaReportsUserModule(String id, String name) {
-        super(id, name)
+    public DynamiaReportsUserModule(String id, String name) {
+        super(id, name);
     }
 
-    DynamiaReportsUserModule(String id, String name, double position) {
-        super(id, name)
-        setPosition(position)
+    public DynamiaReportsUserModule(String id, String name, double position) {
+        super(id, name);
+        setPosition(position);
     }
 
-
-    DynamiaReportsUserModule() {
+    public DynamiaReportsUserModule() {
 
     }
 
     @Override
-    String getIcon() {
+    public String getIcon() {
         return "list";
     }
 
     @Override
-    List<PageGroup> getPageGroups() {
-        init()
-        return super.getPageGroups()
+    public List<PageGroup> getPageGroups() {
+        init();
+        return super.getPageGroups();
     }
 
     private void init() {
-        super.getPageGroups().clear()
+        super.getPageGroups().clear();
 
-        def vm = new ReportListViewModel()
-        vm.init()
+        ReportListViewModel vm = new ReportListViewModel();
+        vm.init();
 
-        vm.reports.each { rg ->
-            def pageGroup = new PageGroup("group$rg.group.id", rg.group.name)
-            addPageGroup(pageGroup)
+        vm.getReports().forEach(rg -> {
 
-            rg.list.each { report ->
-                pageGroup.addPage(new ReportPage(report))
+            final PageGroup pageGroup = new PageGroup("group" + rg.getGroup().getId(), rg.getGroup().getName());
+            addPageGroup(pageGroup);
+            rg.getList().forEach(report -> pageGroup.addPage(new ReportPage(report)));
+        });
 
-            }
-        }
     }
+
 
 }

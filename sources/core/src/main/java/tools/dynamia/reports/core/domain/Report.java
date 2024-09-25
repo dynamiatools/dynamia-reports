@@ -224,4 +224,8 @@ public class Report extends SimpleEntitySaaS {
     public void setDataSourceConfig(ReportDataSourceConfig dataSourceConfig) {
         this.dataSourceConfig = dataSourceConfig;
     }
+
+    public List<ReportFilter> getRequiredFilters() {
+        return getFilters().stream().filter(ReportFilter::isRequired).toList();
+    }
 }
