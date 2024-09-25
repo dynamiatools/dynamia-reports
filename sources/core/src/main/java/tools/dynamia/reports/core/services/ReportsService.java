@@ -6,6 +6,7 @@ import tools.dynamia.reports.core.ReportFilters;
 import tools.dynamia.reports.core.domain.Report;
 import tools.dynamia.reports.core.domain.ReportGroup;
 
+import java.io.File;
 import java.util.List;
 
 public interface ReportsService {
@@ -18,4 +19,8 @@ public interface ReportsService {
     List<Report> findActivesByGroup(ReportGroup reportGroup);
 
     Report findByEndpoint(String endpoint);
+
+    File exportReport(Report report);
+
+    Report importReport(File file);
 }

@@ -13,55 +13,51 @@
  *   If not, see <https://www.gnu.org/licenses/>.
  *
  */
-package tools.dynamia.reports.ui.actions
+package tools.dynamia.reports.ui.actions;
 
-import groovy.json.JsonGenerator
-import groovy.json.JsonOutput
-import org.springframework.beans.factory.annotation.Autowired
-import org.zkoss.zul.Filedownload
-import tools.dynamia.actions.InstallAction
-import tools.dynamia.commons.Messages
-import tools.dynamia.commons.StringUtils
-import tools.dynamia.crud.AbstractCrudAction
-import tools.dynamia.crud.CrudActionEvent
-import tools.dynamia.reports.core.domain.Report
-import tools.dynamia.reports.core.services.ReportsService
-import tools.dynamia.ui.MessageType
-import tools.dynamia.ui.UIMessages
+import org.springframework.beans.factory.annotation.Autowired;
+import org.zkoss.zul.Filedownload;
+import tools.dynamia.actions.InstallAction;
+import tools.dynamia.commons.Messages;
+import tools.dynamia.crud.AbstractCrudAction;
+import tools.dynamia.crud.CrudActionEvent;
+import tools.dynamia.reports.core.domain.Report;
+import tools.dynamia.reports.core.services.ReportsService;
+import tools.dynamia.ui.MessageType;
+import tools.dynamia.ui.UIMessages;
+
+import java.io.File;
 
 @InstallAction
-class ExportReportAction extends AbstractCrudAction {
+public class ExportReportAction extends AbstractCrudAction {
 
-    private ReportsService service
+
+    private final ReportsService service;
 
     @Autowired
-    ExportReportAction(ReportsService service) {
-        this.service = service
-        name = Messages.get(ExportReportAction, "export")
-        image = "down"
-        applicableClass = Report.class
-        menuSupported = true
-       
+    public ExportReportAction(ReportsService service) {
+        this.service = service;
+        setName(Messages.get(ExportReportAction.class, "export"));
+        setImage("down");
+        setApplicableClass(Report.class);
+        setMenuSupported(true);
+
     }
 
     @Override
-    void actionPerformed(CrudActionEvent evt) {
-        def report = evt.data as Report
+    public void actionPerformed(CrudActionEvent evt) {
+        Report report = (Report) evt.getData();
         if (report != null) {
-            report = service.loadReportModel(report.id)
-            def generator = new JsonGenerator.Options()
-                    .excludeNulls()
-                    .excludeFieldsByName('id', 'report', 'accountId')
-                    .build()
-
-            def json = generator.toJson(report)
-
-            File tmpDir = File.createTempDir()
-            File file = new File(tmpDir, "REPORT_${StringUtils.simplifiedString(report.name).toUpperCase()}.json")
-            file.write(JsonOutput.prettyPrint(json))
-            Filedownload.save(file, "text/json")
+            try {
+                File file = service.exportReport(crudService().load(Report.class, report.getId()));
+                Filedownload.save(file, "text/json");
+            } catch (Exception e) {
+                UIMessages.showMessage("Error exporting report: " + e.getMessage(), MessageType.ERROR);
+            }
         } else {
-            UIMessages.showMessage("Select report to export", MessageType.WARNING)
+            UIMessages.showMessage("Select report to export", MessageType.WARNING);
         }
+
     }
+
 }
