@@ -1,5 +1,7 @@
 package tools.dynamia.reports.core.domain;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Cacheable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -15,6 +17,8 @@ import java.util.List;
 @Entity
 @Table(name = "rpt_groups")
 @Cacheable
+@JsonFilter("ignoreIds")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReportGroup extends SimpleEntitySaaS {
 
 

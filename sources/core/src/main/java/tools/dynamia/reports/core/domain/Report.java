@@ -1,6 +1,9 @@
 package tools.dynamia.reports.core.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import tools.dynamia.domain.contraints.NotEmpty;
@@ -14,6 +17,8 @@ import java.util.List;
 @Entity
 @Table(name = "rpt_reports")
 @Cacheable
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonFilter("ignoreIds")
 public class Report extends SimpleEntitySaaS {
 
 
@@ -46,6 +51,7 @@ public class Report extends SimpleEntitySaaS {
     private String endpointName;
 
     @ManyToOne
+    @JsonIgnore
     private ReportDataSourceConfig dataSourceConfig;
 
 
@@ -225,6 +231,7 @@ public class Report extends SimpleEntitySaaS {
         this.dataSourceConfig = dataSourceConfig;
     }
 
+    @JsonIgnore
     public List<ReportFilter> getRequiredFilters() {
         return getFilters().stream().filter(ReportFilter::isRequired).toList();
     }

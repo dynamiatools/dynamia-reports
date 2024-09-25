@@ -1,5 +1,8 @@
 package tools.dynamia.reports.core.domain;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import tools.dynamia.commons.logger.LoggingService;
 import tools.dynamia.commons.logger.SLF4JLoggingService;
@@ -22,11 +25,14 @@ import java.util.stream.Stream;
 
 @Entity
 @Table(name = "rpt_reports_filters")
+@JsonFilter("ignoreIds")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReportFilter extends SimpleEntitySaaS {
 
     private final static LoggingService LOGGER = new SLF4JLoggingService(ReportFilter.class);
 
     @ManyToOne
+    @JsonIgnore
     private Report report;
 
     @NotEmpty
