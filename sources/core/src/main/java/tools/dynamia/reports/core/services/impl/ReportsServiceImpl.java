@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import org.hibernate.Hibernate;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Propagation;
@@ -157,12 +158,19 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
     }
 
     @Override
+    @Transactional
     public Report findByEndpoint(String endpoint) {
         var report = crudService().findSingle(Report.class, QueryParameters.with("endpointName", QueryConditions.eq(endpoint)));
         if (report == null) {
             //if not fount try to find report in system account
             report = crudService().findSingle(Report.class, QueryParameters.with("endpointName", QueryConditions.eq(endpoint))
                     .add("accountId", accountServiceAPI.getSystemAccountId()));
+        }
+        if(report!=null){
+            Hibernate.initialize(report.getFields());
+            Hibernate.initialize(report.getFilters());
+            Hibernate.initialize(report.getCharts());
+            Hibernate.initialize(report.getGroup());
         }
         return report;
     }

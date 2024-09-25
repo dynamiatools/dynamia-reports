@@ -26,8 +26,8 @@ import java.util.Map;
 @RestController
 public class ReportsExportController {
 
-    public static final String DATE_FORMAT = "YYYY-MM-DD";
-    public static final String DATA_TIME_FORMAT = "YYYY-MM-DD hh:mm:ss";
+    public static final String DATE_FORMAT = "yyyy-MM-dd";
+    public static final String DATA_TIME_FORMAT = "yyyy-MM-dd hh:mm:ss";
     public static final String TIME_FORMAT = "hh:mm:ss";
     private final ReportsService reportsService;
 
