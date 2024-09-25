@@ -1,10 +1,17 @@
 package tools.dynamia.reports.core.services.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import org.hibernate.Hibernate;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import tools.dynamia.commons.StringPojoParser;
+import tools.dynamia.commons.StringUtils;
 import tools.dynamia.domain.jdbc.JdbcHelper;
 import tools.dynamia.domain.query.QueryConditions;
 import tools.dynamia.domain.query.QueryParameters;
@@ -17,21 +24,25 @@ import tools.dynamia.reports.core.domain.ReportFilter;
 import tools.dynamia.reports.core.domain.ReportGroup;
 import tools.dynamia.reports.core.services.ReportsService;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
-
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 @CacheConfig(cacheNames = "reports")
 public class ReportsServiceImpl extends AbstractService implements ReportsService {
 
-    @Autowired
-    private AccountServiceAPI accountServiceAPI;
+
+    private final AccountServiceAPI accountServiceAPI;
+
+    public ReportsServiceImpl(AccountServiceAPI accountServiceAPI) {
+        this.accountServiceAPI = accountServiceAPI;
+    }
 
     @Override
     public ReportData execute(Report report, ReportFilters filters, ReportDataSource datasource) {
@@ -39,14 +50,11 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
         long start = System.currentTimeMillis();
         ReportData data = null;
         loadDefaultFilters(report, filters);
-        switch (report.getQueryLang()) {
-            case "sql":
-                data = executeSQL(report, filters, datasource);
-                break;
-            case "jpql":
-                data = executeJPQL(report, filters, datasource);
-                break;
-        }
+        data = switch (report.getQueryLang()) {
+            case "sql" -> executeSQL(report, filters, datasource);
+            case "jpql" -> executeJPQL(report, filters, datasource);
+            default -> data;
+        };
         long end = System.currentTimeMillis();
         log("Report " + report.getName() + " executed in " + (end - start) + "ms");
         return data;
@@ -150,6 +158,7 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
     }
 
     @Override
+    @Transactional
     public Report findByEndpoint(String endpoint) {
         var report = crudService().findSingle(Report.class, QueryParameters.with("endpointName", QueryConditions.eq(endpoint)));
         if (report == null) {
@@ -157,6 +166,91 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
             report = crudService().findSingle(Report.class, QueryParameters.with("endpointName", QueryConditions.eq(endpoint))
                     .add("accountId", accountServiceAPI.getSystemAccountId()));
         }
+        if(report!=null){
+            Hibernate.initialize(report.getFields());
+            Hibernate.initialize(report.getFilters());
+            Hibernate.initialize(report.getCharts());
+            Hibernate.initialize(report.getGroup());
+        }
         return report;
+    }
+
+    @Override
+    public File exportReport(Report report) {
+        try {
+            File file = File.createTempFile("report-" + StringUtils.simplifiedString(report.getName()) + "-", ".json");
+            var ignoreIds = new SimpleFilterProvider();
+            ignoreIds.addFilter("ignoreIds", SimpleBeanPropertyFilter.serializeAllExcept("id", "accountId"));
+
+            StringPojoParser.createJsonMapper().writerFor(Report.class)
+                    .with(ignoreIds)
+                    .writeValue(file, report);
+            return file;
+        } catch (IOException e) {
+            throw new ReportsException("Error exporting report: " + report, e);
+        }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public Report importReport(File file) {
+        try {
+            Report report = StringPojoParser.createJsonMapper().readerFor(Report.class)
+                    .readValue(file);
+
+            if (report != null) {
+                report.setId(null);
+                report.setName(report.getName() + " (imported)");
+                report.setActive(false);
+                report.setExportWithoutFormat(false);
+                report.setExportEndpoint(false);
+                report.setDataSourceConfig(null);
+                if (report.getGroup() != null) {
+                    report.setGroup(findGroup(report.getGroup().getName()));
+                    report.setAccountId(report.getGroup().getAccountId());
+                }
+
+                if (report.getFilters() != null) {
+                    report.getFilters().forEach(f -> {
+                        f.setId(null);
+                        f.setAccountId(report.getAccountId());
+                        f.setReport(report);
+                    });
+                }
+
+                if (report.getFields() != null) {
+                    report.getFields().forEach(f -> {
+                        f.setId(null);
+                        f.setAccountId(report.getAccountId());
+                        f.setReport(report);
+                    });
+                }
+
+                if (report.getCharts() != null) {
+                    report.getCharts().forEach(c -> {
+                        c.setId(null);
+                        c.setAccountId(report.getAccountId());
+                        c.setReport(report);
+                    });
+                }
+            }
+            validate(report);
+            report.save();
+            return report;
+        } catch (Exception e) {
+            log("Error importing", e);
+            throw new ReportsException("Error importing report", e);
+        }
+    }
+
+    public ReportGroup findGroup(String name) {
+        var group = crudService().findSingle(ReportGroup.class, "name", QueryConditions.eq(name));
+        if (group == null) {
+            group = new ReportGroup();
+            group.setName(name);
+            group.setActive(true);
+            group.save();
+        }
+        return group;
     }
 }

@@ -1,5 +1,8 @@
 package tools.dynamia.reports.core.domain;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
@@ -11,10 +14,13 @@ import tools.dynamia.modules.saas.jpa.SimpleEntitySaaS;
 
 @Entity
 @Table(name = "rpt_reports_charts")
+@JsonFilter("ignoreIds")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReportChart extends SimpleEntitySaaS {
 
 
     @ManyToOne
+    @JsonIgnore
     private Report report;
     @NotEmpty
     @NotNull
