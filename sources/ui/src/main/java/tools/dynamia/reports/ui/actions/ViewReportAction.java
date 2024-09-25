@@ -13,47 +13,51 @@
  *   If not, see <https://www.gnu.org/licenses/>.
  *
  */
-package tools.dynamia.reports.ui.actions
+package tools.dynamia.reports.ui.actions;
 
-import org.springframework.beans.factory.annotation.Autowired
-import tools.dynamia.actions.InstallAction
-import tools.dynamia.commons.Messages
-import tools.dynamia.crud.AbstractCrudAction
-import tools.dynamia.crud.CrudActionEvent
-import tools.dynamia.crud.CrudState
-import tools.dynamia.navigation.NavigationManager
-import tools.dynamia.reports.core.domain.Report
-import tools.dynamia.reports.core.services.ReportsService
-import tools.dynamia.reports.ui.ReportPage
+import org.springframework.beans.factory.annotation.Autowired;
+import tools.dynamia.actions.InstallAction;
+import tools.dynamia.commons.Messages;
+import tools.dynamia.crud.AbstractCrudAction;
+import tools.dynamia.crud.CrudActionEvent;
+import tools.dynamia.crud.CrudState;
+import tools.dynamia.navigation.NavigationManager;
+import tools.dynamia.reports.core.domain.Report;
+import tools.dynamia.reports.core.services.ReportsService;
+import tools.dynamia.reports.ui.ReportPage;
 
 @InstallAction
-class ViewReportAction extends AbstractCrudAction {
+public class ViewReportAction extends AbstractCrudAction {
 
-
-    private ReportsService service
+    private final ReportsService service;
 
     @Autowired
-    ViewReportAction(ReportsService service) {
-        this.service = service
+    public ViewReportAction(ReportsService service) {
+        this.service = service;
 
-        name = Messages.get(ViewReportAction, "view")
-        applicableClass = Report.class
-        applicableStates = CrudState.get(CrudState.READ, CrudState.UPDATE)
-        menuSupported = true
-        image = "play"
-        background = "#28a5d4"
-        color = "white"
+        setName(Messages.get(ViewReportAction.class, "view"));
+        setApplicableClass(Report.class);
+        setApplicableStates(CrudState.get(CrudState.READ, CrudState.UPDATE));
+        setMenuSupported(true);
+        setImage("play");
+        setBackground("#28a5d4");
+        setColor("white");
     }
 
     @Override
-    void actionPerformed(CrudActionEvent evt) {
-        def report = evt.data as Report
-        if (report != null) {
-            view(report, true)
+    public void actionPerformed(CrudActionEvent evt) {
+        if (evt.getData() instanceof Report report) {
+            view(report, true);
         }
+
     }
 
-    void view(Report report, boolean reloable) {
-        NavigationManager.getCurrent().currentPage = new ReportPage(report)
+    public void view(Report report, boolean reloable) {
+        if (reloable && report.getId() != null) {
+            report = crudService().load(Report.class, report.getId());
+        }
+        NavigationManager.getCurrent().setCurrentPage(new ReportPage(report));
     }
+
+
 }

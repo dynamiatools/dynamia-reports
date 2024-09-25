@@ -110,14 +110,12 @@ class ReportViewer extends Div implements ActionEventBuilder {
     def initUI() {
         vflex = "1"
         layout = new Borderlayout()
-        layout.with {
-            appendChild(new Center())
-            appendChild(new South())
-            vflex = "1"
-            hflex = "1"
-            south.style = "padding-top: 3px "
-        }
 
+        layout.appendChild(new Center())
+        layout.appendChild(new South())
+        layout.vflex = "1"
+        layout.hflex = "1"
+        layout.south.style = "padding-top: 3px "
         dataViewContainer = layout.center
 
         if (HttpUtils.isSmartphone()) {
@@ -152,12 +150,12 @@ class ReportViewer extends Div implements ActionEventBuilder {
         Tabbox content = new Tabbox()
         layout.center.children.clear()
         layout.center.appendChild(content)
-        content.with {
-            appendChild(new Tabs())
-            appendChild(new Tabpanels())
-            vflex = "1"
-            hflex = "1"
-        }
+
+        content.appendChild(new Tabs())
+        content.appendChild(new Tabpanels())
+        content.vflex = "1"
+        content.hflex = "1"
+
 
         if (report.filters) {
             content.tabs.appendChild(new Tab(messages.get("filters")))
@@ -178,23 +176,23 @@ class ReportViewer extends Div implements ActionEventBuilder {
 
     private void initDesktopLayout() {
         if (report.filters) {
-            layout.with {
-                appendChild(new West())
-                west.width = "20%"
-                west.collapsible = true
-                west.splittable = true
-                west.title = messages.get("filters")
-            }
+
+            layout.appendChild(new West())
+            layout.west.width = "20%"
+            layout.west.collapsible = true
+            layout.west.splittable = true
+            layout.west.title = messages.get("filters")
+
             filtersContainer = layout.west
         }
 
         if (report.chartable) {
-            layout.with {
-                appendChild(new East())
-                east.width = "40%"
-                east.splittable = true
-                east.autoscroll = true
-            }
+
+            layout.appendChild(new East())
+            layout.east.width = "40%"
+            layout.east.splittable = true
+            layout.east.autoscroll = true
+
             chartsContainer = layout.east
         }
     }
@@ -203,7 +201,7 @@ class ReportViewer extends Div implements ActionEventBuilder {
         if (!report.filters.empty) {
 
             def descriptor = new DefaultViewDescriptor()
-            report.filters.each { filter ->
+            report.filters.forEach { filter ->
                 Field field = new Field(filter.name, filter.dataType.typeClass)
                 field.propertyInfo = new PropertyInfo(field.name, field.fieldClass, Report, AccessMode.READ_WRITE)
                 field.label = filter.label
@@ -264,7 +262,7 @@ class ReportViewer extends Div implements ActionEventBuilder {
 
         if (!report.autofields) {
 
-            report.fields.sort { a, b -> a.order <=> b.order }.forEach { f ->
+            report.fields.stream().sorted { a, b -> a.order <=> b.order }.forEach { f ->
                 Listheader col = new Listheader(f.label)
                 col.sortAscending = new FieldComparator(f.name, true)
                 col.sortDescending = new FieldComparator(f.name, false)
@@ -292,7 +290,7 @@ class ReportViewer extends Div implements ActionEventBuilder {
             if (filtersPanel != null) {
                 QueryParameters params = filtersPanel.queryParameters
                 validate(params)
-                params.each { k, v -> filters.add(report.findFilter(k), getFilterValue(v)) }
+                params.forEach { k, v -> filters.add(report.findFilter(k), getFilterValue(v)) }
             }
 
 
@@ -469,11 +467,11 @@ class ReportViewer extends Div implements ActionEventBuilder {
             def chartLayout = new Vlayout()
             chartsContainer.appendChild(chartLayout)
 
-            report.charts.each { c ->
+            report.charts.forEach { c ->
                 def data = new CategoryChartjsData()
                 if (c.grouped) {
                     Map<String, Number> groups = new HashMap<>()
-                    reportData.getEntries().each {
+                    reportData.getEntries().forEach {
                         def label = it.values[c.labelField].toString()
                         def value = (Number) it.values[c.valueField]
                         if (value == null) {
@@ -484,9 +482,9 @@ class ReportViewer extends Div implements ActionEventBuilder {
                         sum = sum == null ? value : sum + value
                         groups.put(label, sum)
                     }
-                    groups.each { k, v -> data.add(k, v) }
+                    groups.forEach { k, v -> data.add(k, v) }
                 } else {
-                    reportData.getEntries().each {
+                    reportData.getEntries().forEach {
                         def label = it.values[c.labelField].toString()
                         def value = (Number) it.values[c.valueField]
                         data.add(label, value)
@@ -497,7 +495,7 @@ class ReportViewer extends Div implements ActionEventBuilder {
                 chart.type = c.type
                 chart.data = data
                 chart.title = c.title
-                currentCharts << chart
+                currentCharts.add(chart)
 
 
                 chartLayout.appendChild(chart)
@@ -512,7 +510,7 @@ class ReportViewer extends Div implements ActionEventBuilder {
 
         addColumnNumber()
 
-        reportData.fieldNames.each { fieldName ->
+        reportData.fieldNames.forEach { fieldName ->
 
             Listheader col = new Listheader(StringUtils.addSpaceBetweenWords(StringUtils.capitalizeAllWords(fieldName)))
             col.attributes["reportFieldName"] = fieldName
@@ -590,13 +588,13 @@ class ReportViewer extends Div implements ActionEventBuilder {
     }
 
     void addAction(Action action) {
-        actions << action
+        actions.add(action)
     }
 
     def renderActions() {
         ButtonActionRenderer renderer = new ButtonActionRenderer()
         renderer.zclass = "btn btn-default"
-        actions.each { action ->
+        actions.forEach { action ->
             buttons.appendChild(Actions.render(renderer, action, this))
         }
 
