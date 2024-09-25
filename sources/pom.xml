@@ -23,7 +23,7 @@
     <packaging>pom</packaging>
     <groupId>tools.dynamia.reports</groupId>
     <artifactId>tools.dynamia.reports.parent</artifactId>
-    <version>2.2.1</version>
+    <version>2.3.0</version>
     <name>DynamiaReports</name>
     <description>DynamiaTools extension for build in app reports with queries and charts</description>
     <inceptionYear>2018</inceptionYear>
@@ -48,8 +48,8 @@
     </scm>
 
     <properties>
-        <dynamiatools.version>5.1.1</dynamiatools.version>
-        <springboot.version>3.2.5</springboot.version>
+        <dynamiatools.version>5.2.1</dynamiatools.version>
+        <springboot.version>3.3.3</springboot.version>
         <saas.version>3.1.1</saas.version>
         <java.version>17</java.version>
 
@@ -137,7 +137,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.3.1</version>
             </plugin>
         </plugins>
     </build>
