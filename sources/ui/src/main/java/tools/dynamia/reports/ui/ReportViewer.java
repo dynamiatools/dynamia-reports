@@ -13,596 +13,630 @@
  *   If not, see <https://www.gnu.org/licenses/>.
  *
  */
-
-package tools.dynamia.reports.ui
-
-
-import org.zkoss.zhtml.Hr
-import org.zkoss.zk.ui.Component
-import org.zkoss.zk.ui.event.Events
-import org.zkoss.zk.ui.event.SortEvent
-import org.zkoss.zul.*
-import tools.dynamia.actions.Action
-import tools.dynamia.actions.ActionEvent
-import tools.dynamia.actions.ActionEventBuilder
-import tools.dynamia.actions.Actions
-import tools.dynamia.commons.ClassMessages
-import tools.dynamia.commons.Formatters
-import tools.dynamia.commons.StringUtils
-import tools.dynamia.commons.ValueWrapper
-import tools.dynamia.commons.reflect.AccessMode
-import tools.dynamia.commons.reflect.PropertyInfo
-import tools.dynamia.crud.FilterCondition
-import tools.dynamia.commons.Identifiable
-import tools.dynamia.domain.ValidationError
-import tools.dynamia.domain.query.QueryCondition
-import tools.dynamia.domain.query.QueryParameters
-import tools.dynamia.reports.api.EnumFilterProvider
-import tools.dynamia.reports.core.ExcelFormattedReportDataExporter
-import tools.dynamia.reports.core.ExcelReportDataExporter
-import tools.dynamia.reports.core.ReportData
-import tools.dynamia.reports.core.ReportFilterOption
-import tools.dynamia.reports.core.ReportFilters
-import tools.dynamia.reports.core.ReportsUtils
-import tools.dynamia.reports.core.domain.Report
-import tools.dynamia.reports.core.domain.ReportField
-import tools.dynamia.reports.core.domain.enums.DataType
-import tools.dynamia.reports.core.services.ReportsService
-import tools.dynamia.reports.core.ReportDataSource
-import tools.dynamia.ui.MessageType
-import tools.dynamia.ui.UIMessages
-import tools.dynamia.viewers.Field
-import tools.dynamia.viewers.impl.DefaultViewDescriptor
-import tools.dynamia.web.util.HttpUtils
-import tools.dynamia.zk.actions.ButtonActionRenderer
-
-import tools.dynamia.zk.crud.ui.EntityFiltersPanel
-import tools.dynamia.zk.ui.chartjs.CategoryChartjsData
-import tools.dynamia.zk.ui.chartjs.Chartjs
-
-class ReportViewer extends Div implements ActionEventBuilder {
+package tools.dynamia.reports.ui;
 
 
-    public static final int MAX_RESULT_TO_DISPLAY = 2000
-    private ClassMessages messages = ClassMessages.get(ReportViewer.class)
-    private ReportsService service
-    private Report report
-    private ReportDataSource dataSource
-    private Borderlayout layout
-    private EntityFiltersPanel filtersPanel
-    private Listbox dataView
-    private ReportData reportData
-    private Button executeButton
-    private Button exportButton
-    private Button reloadButton
-    private Hlayout buttons
-    private List<Action> actions
-    private List<Chartjs> currentCharts
-    private Component filtersContainer
-    private Component dataViewContainer
-    private Component chartsContainer
-    private ReportFilters filters
+import org.zkoss.zhtml.Hr;
+import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.event.SortEvent;
+import org.zkoss.zul.*;
+import tools.dynamia.actions.Action;
+import tools.dynamia.actions.ActionEvent;
+import tools.dynamia.actions.ActionEventBuilder;
+import tools.dynamia.actions.Actions;
+import tools.dynamia.commons.*;
+import tools.dynamia.commons.reflect.AccessMode;
+import tools.dynamia.commons.reflect.PropertyInfo;
+import tools.dynamia.crud.FilterCondition;
+import tools.dynamia.domain.ValidationError;
+import tools.dynamia.domain.query.QueryCondition;
+import tools.dynamia.domain.query.QueryParameters;
+import tools.dynamia.reports.api.EnumFilterProvider;
+import tools.dynamia.reports.core.*;
+import tools.dynamia.reports.core.domain.Report;
+import tools.dynamia.reports.core.domain.ReportField;
+import tools.dynamia.reports.core.domain.ReportFilter;
+import tools.dynamia.reports.core.domain.enums.DataType;
+import tools.dynamia.reports.core.services.ReportsService;
+import tools.dynamia.ui.MessageType;
+import tools.dynamia.ui.UIMessages;
+import tools.dynamia.viewers.Field;
+import tools.dynamia.viewers.impl.DefaultViewDescriptor;
+import tools.dynamia.web.util.HttpUtils;
+import tools.dynamia.zk.actions.ButtonActionRenderer;
+import tools.dynamia.zk.crud.ui.EntityFiltersPanel;
+import tools.dynamia.zk.ui.chartjs.CategoryChartjsData;
+import tools.dynamia.zk.ui.chartjs.Chartjs;
 
-    ReportViewer(ReportsService service, Report report, ReportDataSource dataSource) {
-        this.service = service
-        this.report = report
-        this.dataSource = dataSource
-        this.actions = new ArrayList<>()
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.math.BigDecimal;
+import java.util.*;
+
+public class ReportViewer extends Div implements ActionEventBuilder {
+
+
+    public static final int MAX_RESULT_TO_DISPLAY = 2000;
+    private final ClassMessages messages = ClassMessages.get(ReportViewer.class);
+    private final ReportsService service;
+    private Report report;
+    private final ReportDataSource dataSource;
+    private Borderlayout layout;
+    private EntityFiltersPanel filtersPanel;
+    private Listbox dataView;
+    private ReportData reportData;
+    private Button executeButton;
+    private Button exportButton;
+    private Button reloadButton;
+    private Hlayout buttons;
+    private final List<Action> actions;
+    private List<Chartjs> currentCharts;
+    private Component filtersContainer;
+    private Component dataViewContainer;
+    private Component chartsContainer;
+    private ReportFilters filters;
+
+    public ReportViewer(ReportsService service, Report report, ReportDataSource dataSource) {
+        this.service = service;
+        this.report = report;
+        this.dataSource = dataSource;
+        this.actions = new ArrayList<Action>();
         if (this.report != null) {
-            init()
+            init();
         }
+
     }
 
     private void init() {
-        this.report = this.service.loadReportModel(this.report.id)
-        initUI()
-        initFiltersPanel()
-        initDataView()
+        this.report = this.service.loadReportModel(this.report.getId());
+        initUI();
+        initFiltersPanel();
+        initDataView();
     }
 
-    void reload() {
-        children.clear()
-        init()
-        renderActions()
+    public void reload() {
+        getChildren().clear();
+        init();
+        renderActions();
     }
 
+    public void initUI() {
+        setVflex("1");
+        layout = new Borderlayout();
 
-    def initUI() {
-        vflex = "1"
-        layout = new Borderlayout()
-
-        layout.appendChild(new Center())
-        layout.appendChild(new South())
-        layout.vflex = "1"
-        layout.hflex = "1"
-        layout.south.style = "padding-top: 3px "
-        dataViewContainer = layout.center
+        layout.appendChild(new Center());
+        layout.appendChild(new South());
+        layout.setVflex("1");
+        layout.setHflex("1");
+        layout.getSouth().setStyle("padding-top: 3px ");
+        dataViewContainer = layout.getCenter();
 
         if (HttpUtils.isSmartphone()) {
-            initMobileLayout()
+            initMobileLayout();
         } else {
-            initDesktopLayout()
+            initDesktopLayout();
         }
-        appendChild(layout)
 
-        this.buttons = new Hlayout()
-        executeButton = new Button(messages.get("execute"))
-        executeButton.addEventListener(Events.ON_CLICK, { execute() })
-        executeButton.zclass = "btn btn-primary"
-        executeButton.iconSclass = "fa fa-play"
-        buttons.appendChild(executeButton)
+        appendChild(layout);
 
-        exportButton = new Button(messages.get("exportExcel"))
-        exportButton.iconSclass = "fa fa-file-excel-o"
-        exportButton.addEventListener(Events.ON_CLICK, { export() })
-        exportButton.zclass = "btn btn-success"
-        buttons.appendChild(exportButton)
+        this.buttons = new Hlayout();
+        executeButton = new Button(messages.get("execute"));
+        executeButton.addEventListener(Events.ON_CLICK, evt -> execute());
+        executeButton.setZclass("btn btn-primary");
+        executeButton.setIconSclass("fa fa-play");
+        buttons.appendChild(executeButton);
 
-        reloadButton = new Button(messages.get("reload"))
-        reloadButton.iconSclass = "fa fa-refresh"
-        reloadButton.addEventListener(Events.ON_CLICK, { reload() })
-        reloadButton.zclass = "btn btn-danger"
-        buttons.appendChild(reloadButton)
-        layout.south.appendChild(buttons)
+        exportButton = new Button(messages.get("exportExcel"));
+        exportButton.setIconSclass("fa fa-file-excel-o");
+        exportButton.addEventListener(Events.ON_CLICK, evt -> export());
+        exportButton.setZclass("btn btn-success");
+        buttons.appendChild(exportButton);
+
+        reloadButton = new Button(messages.get("reload"));
+        reloadButton.setIconSclass("fa fa-refresh");
+        reloadButton.addEventListener(Events.ON_CLICK, evt -> reload());
+        reloadButton.setZclass("btn btn-danger");
+        buttons.appendChild(reloadButton);
+        layout.getSouth().appendChild(buttons);
     }
 
-    def initMobileLayout() {
-        Tabbox content = new Tabbox()
-        layout.center.children.clear()
-        layout.center.appendChild(content)
+    public void initMobileLayout() {
+        Tabbox content = new Tabbox();
+        layout.getCenter().getChildren().clear();
+        layout.getCenter().appendChild(content);
 
-        content.appendChild(new Tabs())
-        content.appendChild(new Tabpanels())
-        content.vflex = "1"
-        content.hflex = "1"
+        content.appendChild(new Tabs());
+        content.appendChild(new Tabpanels());
+        content.setVflex("1");
+        content.setHflex("1");
 
 
-        if (report.filters) {
-            content.tabs.appendChild(new Tab(messages.get("filters")))
-            filtersContainer = new Tabpanel()
-            content.tabpanels.appendChild(filtersContainer)
+        if (report.getFilters() != null && !report.getFilters().isEmpty()) {
+            content.getTabs().appendChild(new Tab(messages.get("filters")));
+            filtersContainer = new Tabpanel();
+            content.getTabpanels().appendChild(filtersContainer);
         }
 
-        content.tabs.appendChild(new Tab(messages.get("result")))
-        dataViewContainer = new Tabpanel()
-        content.tabpanels.appendChild(dataViewContainer)
 
-        if (report.chartable) {
-            content.tabs.appendChild(new Tab(messages.get("charts")))
-            chartsContainer = new Tabpanel()
-            content.tabpanels.appendChild(chartsContainer)
+        content.getTabs().appendChild(new Tab(messages.get("result")));
+        dataViewContainer = new Tabpanel();
+        content.getTabpanels().appendChild(dataViewContainer);
+
+        if (report.getChartable()) {
+            content.getTabs().appendChild(new Tab(messages.get("charts")));
+            chartsContainer = new Tabpanel();
+            content.getTabpanels().appendChild(chartsContainer);
         }
+
     }
 
     private void initDesktopLayout() {
-        if (report.filters) {
+        if (report.getFilters() != null && !report.getFilters().isEmpty()) {
 
-            layout.appendChild(new West())
-            layout.west.width = "20%"
-            layout.west.collapsible = true
-            layout.west.splittable = true
-            layout.west.title = messages.get("filters")
+            layout.appendChild(new West());
+            layout.getWest().setWidth("20%");
+            layout.getWest().setCollapsible(true);
+            layout.getWest().setSplittable(true);
+            layout.getWest().setTitle(messages.get("filters"));
 
-            filtersContainer = layout.west
+            filtersContainer = layout.getWest();
         }
 
-        if (report.chartable) {
 
-            layout.appendChild(new East())
-            layout.east.width = "40%"
-            layout.east.splittable = true
-            layout.east.autoscroll = true
+        if (report.getChartable()) {
 
-            chartsContainer = layout.east
+            layout.appendChild(new East());
+            layout.getEast().setWidth("40%");
+            layout.getEast().setSplittable(true);
+            layout.getEast().setAutoscroll(true);
+
+            chartsContainer = layout.getEast();
         }
+
     }
 
-    def initFiltersPanel() {
-        if (!report.filters.empty) {
+    public void initFiltersPanel() {
+        if (!report.getFilters().isEmpty()) {
 
-            def descriptor = new DefaultViewDescriptor()
-            report.filters.forEach { filter ->
-                Field field = new Field(filter.name, filter.dataType.typeClass)
-                field.propertyInfo = new PropertyInfo(field.name, field.fieldClass, Report, AccessMode.READ_WRITE)
-                field.label = filter.label
-                field.required = filter.required
-                if (filter.hideLabel) {
-                    field.set("showLabel", false)
+            final DefaultViewDescriptor descriptor = new DefaultViewDescriptor();
+            report.getFilters().forEach(filter -> {
+                Field field = new Field(filter.getName(), filter.getDataType().getTypeClass());
+                field.setPropertyInfo(new PropertyInfo(field.getName(), field.getFieldClass(), Report.class, AccessMode.READ_WRITE));
+                field.setLabel(filter.getLabel());
+                field.setRequired(filter.isRequired());
+                if (filter.getHideLabel()) {
+                    field.set("showLabel", false);
                 }
-                field.addParam("condition", FilterCondition.EQUALS.name())
 
-                if (filter.dataType == DataType.ENUM && filter.enumClassName != null) {
-                    EnumFilterProvider provider = ReportsUtils.findEnumFilterProvider(filter.enumClassName);
+                field.addParam("condition", FilterCondition.EQUALS.name());
+
+                if (filter.getDataType().equals(DataType.ENUM) && filter.getEnumClassName() != null) {
+                    EnumFilterProvider provider = ReportsUtils.findEnumFilterProvider(filter.getEnumClassName());
                     if (provider != null) {
-                        field.fieldClass = Class.forName(filter.enumClassName)
-                        field.propertyInfo = new PropertyInfo(field.name, field.fieldClass, Report, AccessMode.READ_WRITE)
-                        field.addParam("enumValues", Arrays.asList(provider.values))
+                        try {
+                            field.setFieldClass(Class.forName(filter.getEnumClassName()));
+                        } catch (ClassNotFoundException e) {
+
+                        }
+                        field.setPropertyInfo(new PropertyInfo(field.getName(), field.getFieldClass(), Report.class, AccessMode.READ_WRITE));
+                        field.addParam("enumValues", Arrays.asList(provider.getValues()));
                     } else {
-                        field.visible = false
+                        field.setVisible(false);
                     }
 
-                } else if (filter.dataType == DataType.ENTITY && filter.entityClassName != null) {
-                    field.fieldClass = Class.forName(filter.entityClassName)
-                    field.propertyInfo = new PropertyInfo(field.name, field.fieldClass, Report, AccessMode.READ_WRITE)
-                } else if (filter.queryValues != null && !filter.queryValues.empty) {
-                    List<ReportFilterOption> options = filter.loadOptions(dataSource)
-                    field.component = "combobox"
-                    field.addParam("readonly", true)
-                    field.addParam("model", new ValueWrapper(new ListModelList(options), ListModel))
-                    field.addParam("itemRenderer", new ValueWrapper(new ReportFilterOptionItemRenderer(), ComboitemRenderer))
-                } else if (filter.dataType == DataType.BOOLEAN) {
-                    field.component = "booleanbox"
-                } else if (filter.dataType == DataType.TIME) {
-                    field.component = "timebox"
-                } else if (filter.dataType == DataType.DATE_TIME) {
-                    field.addParam("format", "dd/MM/yyyy HH:mm")
-                }
-                descriptor.addField(field)
-            }
 
-            filtersPanel = new EntityFiltersPanel(Report)
-            filtersPanel.viewDescriptor = descriptor
-            filtersPanel.addEventListener(EntityFiltersPanel.ON_SEARCH, { execute() })
-            filtersContainer.appendChild(filtersPanel)
-            filtersPanel.south.detach()
+                } else if (filter.getDataType().equals(DataType.ENTITY) && filter.getEntityClassName() != null) {
+                    try {
+                        field.setFieldClass(Class.forName(filter.getEntityClassName()));
+                    } catch (ClassNotFoundException e) {
+
+                    }
+                    field.setPropertyInfo(new PropertyInfo(field.getName(), field.getFieldClass(), Report.class, AccessMode.READ_WRITE));
+                } else if (filter.getQueryValues() != null && !filter.getQueryValues().isEmpty()) {
+                    List<ReportFilterOption> options = filter.loadOptions(dataSource);
+                    field.setComponent("combobox");
+                    field.addParam("readonly", true);
+                    field.addParam("model", new ValueWrapper(new ListModelList(options), ListModel.class));
+                    field.addParam("itemRenderer", new ValueWrapper(new ReportFilterOptionItemRenderer(), ComboitemRenderer.class));
+                } else if (filter.getDataType().equals(DataType.BOOLEAN)) {
+                    field.setComponent("booleanbox");
+                } else if (filter.getDataType().equals(DataType.TIME)) {
+                    field.setComponent("timebox");
+                } else if (filter.getDataType().equals(DataType.DATE_TIME)) {
+                    field.addParam("format", "dd/MM/yyyy HH:mm");
+                }
+
+                descriptor.addField(field);
+            });
+
+
+            filtersPanel = new EntityFiltersPanel(Report.class);
+            filtersPanel.setViewDescriptor(descriptor);
+            filtersPanel.addEventListener(EntityFiltersPanel.ON_SEARCH, evt -> execute());
+            filtersContainer.appendChild(filtersPanel);
+            filtersPanel.getSouth().detach();
         }
+
     }
 
-    def initDataView() {
-        dataView = new Listbox()
-        dataView.sclass = "table-view"
-        dataView.appendChild(new Listhead())
-        dataView.appendChild(new Listfoot())
-        dataView.vflex = "1"
-        dataView.hflex = "1"
-        dataView.mold = "paging"
-        dataView.sizedByContent = true
+    public void initDataView() {
+        dataView = new Listbox();
+        dataView.setSclass("table-view");
+        dataView.appendChild(new Listhead());
+        dataView.appendChild(new Listfoot());
+        dataView.setVflex("1");
+        dataView.setHflex("1");
+        dataView.setMold("paging");
+        dataView.setSizedByContent(true);
 
-        addColumnNumber()
+        addColumnNumber();
 
-        if (!report.autofields) {
-
-            report.fields.stream().sorted { a, b -> a.order <=> b.order }.forEach { f ->
-                Listheader col = new Listheader(f.label)
-                col.sortAscending = new FieldComparator(f.name, true)
-                col.sortDescending = new FieldComparator(f.name, false)
-                setupColumn(f, col)
-                dataView.listhead.appendChild(col)
-
-                createFooter(f.name)
-            }
+        if (!report.getAutofields()) {
+            report.getFields().stream().sorted(Comparator.comparingInt(ReportField::getOrder))
+                    .forEach(f -> {
+                        Listheader col = new Listheader(f.getLabel());
+                        col.setSortAscending(new FieldComparator(f.getName(), true));
+                        col.setSortDescending(new FieldComparator(f.getName(), false));
+                        setupColumn(f, col);
+                        getDataView().getListhead().appendChild(col);
+                        createFooter(f.getName());
+                    });
         }
 
-        dataViewContainer.appendChild(dataView)
+        dataViewContainer.appendChild(dataView);
 
     }
 
     private void createFooter(String name) {
-        Listfooter footer = new Listfooter()
-        footer.attributes["reportFieldName"] = name
-        dataView.listfoot.appendChild(footer)
+        Listfooter footer = new Listfooter();
+        footer.getAttributes().put("reportFieldName", name);
+        dataView.getListfoot().appendChild(footer);
     }
 
-    def execute() {
+    public void execute() {
         try {
-            this.filters = new ReportFilters()
+            this.filters = new ReportFilters();
 
             if (filtersPanel != null) {
-                QueryParameters params = filtersPanel.queryParameters
-                validate(params)
-                params.forEach { k, v -> filters.add(report.findFilter(k), getFilterValue(v)) }
+                QueryParameters params = filtersPanel.getQueryParameters();
+                validate(params);
+                params.forEach((k, v) -> filters.add(getReport().findFilter(k), getFilterValue(v)));
             }
 
 
-            this.reportData = service.execute(report, filters, dataSource)
-            if (reportData.empty) {
-                UIMessages.showMessage(messages.get("noresult"), MessageType.WARNING)
+            this.reportData = service.execute(report, filters, dataSource);
+            if (reportData.isEmpty()) {
+                UIMessages.showMessage(messages.get("noresult"), MessageType.WARNING);
             } else {
-                UIMessages.showMessage("$reportData.size ${messages.get("results")}")
+                UIMessages.showMessage(getReportData().getSize() + " " + messages.get("results"));
             }
-            if (reportData.size > MAX_RESULT_TO_DISPLAY) {
-                UIMessages.showQuestion("El resultado de la consulta es muy grande ($reportData.size) para visualizarse. Desea exportarlo a excel?", {
-                    export()
-                })
+
+            if (reportData.getSize() > MAX_RESULT_TO_DISPLAY) {
+                UIMessages.showQuestion("El resultado de la consulta es muy grande (" + getReportData().getSize() + ") para visualizarse. Desea exportarlo a excel?", this::export);
             } else {
-                if (report.autofields) {
-                    buildAutoColumns()
+                if (report.getAutofields()) {
+                    buildAutoColumns();
                 }
-                updateDataView()
+                updateDataView();
             }
+
         } catch (ValidationError e) {
-            UIMessages.showMessage(e.message, MessageType.ERROR)
+            UIMessages.showMessage(e.getMessage(), MessageType.ERROR);
         } catch (Exception e) {
-            if (e.message.contains("interrupted")) {
-                Messagebox.show("La consulta demora mucho tiempo en procesarse, por favor utilice otros filtros" +
-                        " o intente mas tarde. Por ejemplo, si esta usando un rango de fechas reduzca la diferencia.", "Error al Consultar",
-                        Messagebox.OK, Messagebox.ERROR)
+            if (e.getMessage().contains("interrupted")) {
+                Messagebox.show("La consulta demora mucho tiempo en procesarse, por favor utilice otros filtros" + " o intente mas tarde. Por ejemplo, si esta usando un rango de fechas reduzca la diferencia.", "Error al Consultar", Messagebox.OK, Messagebox.ERROR);
             } else {
-                Messagebox.show(e.message)
-                e.printStackTrace()
+                Messagebox.show(e.getMessage());
+                e.printStackTrace();
             }
         }
+
     }
 
-    def validate(QueryParameters params) {
-        def requiredFilters = report.getRequiredFilters();
-        def filter = requiredFilters.find { !params.containsKey(it.name) }
+    public void validate(final QueryParameters params) {
+        List<ReportFilter> requiredFilters = report.getRequiredFilters();
+        ReportFilter filter = requiredFilters.stream().filter(it -> !params.containsKey(it.getName())).findFirst().orElse(null);
+
         if (filter != null) {
-            throw new ValidationError(messages.get("errorfiltersRequired", filter.label))
+            throw new ValidationError(messages.get("errorfiltersRequired", filter.getLabel()));
         }
+
     }
 
-    def getFilterValue(Object filterValue) {
-        if (filterValue instanceof QueryCondition) {
-
-            if (filterValue.value instanceof ReportFilterOption) {
-                def opt = filterValue.value as ReportFilterOption
-                return opt.value
-            } else if (filterValue.value instanceof Enum && report.queryLang == "sql") {
-                return filterValue.value.ordinal()
-            } else if (filterValue.value instanceof Identifiable) {
-                return filterValue.value.id
+    public Object getFilterValue(Object filterValue) {
+        if (filterValue instanceof QueryCondition condition) {
+            if (condition.getValue() instanceof ReportFilterOption opt) {
+                return opt.getValue();
+            } else if (condition.getValue() instanceof Enum enumeration && report.getQueryLang().equals("sql")) {
+                return enumeration.ordinal();
+            } else if (condition.getValue() instanceof Identifiable identifiable) {
+                return identifiable.getId();
             } else {
-                return filterValue.value
+                return condition.getValue();
             }
         } else {
-            return filterValue
+            return filterValue;
         }
+
     }
 
-    def export() {
+    public void export() {
         File file = null;
-        if (report.exportWithoutFormat) {
-            file = new ExcelReportDataExporter(report).export(reportData)
+        if (report.getExportWithoutFormat()) {
+            file = new ExcelReportDataExporter(report).export(reportData);
         } else {
-            file = new ExcelFormattedReportDataExporter(report, filters).export(reportData)
+            file = new ExcelFormattedReportDataExporter(report, filters).export(reportData);
         }
+
         if (file != null) {
-            Filedownload.save(file, "application/excel")
+            try {
+                Filedownload.save(file, "application/excel");
+            } catch (FileNotFoundException e) {
+                UIMessages.showMessage("Error al exportar", MessageType.ERROR);
+            }
         }
+
     }
 
-    def updateDataView() {
+    public void updateDataView() {
 
-        def fieldsNames = report.autofields ? reportData.fieldNames : report.fields.collect { it.name }
+        List<String> fieldsNames = report.isAutofields()
+                ? reportData.getFieldNames()
+                : report.getFields().stream().map(ReportField::getName).toList();
 
-        dataView.items.clear()
-        def totals = [:]
-        def count = 0
-        reportData.entries.forEach { data ->
-            def row = new Listitem()
-            dataView.appendChild(row)
+        dataView.getItems().clear();
+        Map<String, Object> totals = new HashMap<>();
+        int count = 0;
 
-            count++
-            def cellCount = new Listcell(count.toString())
-            cellCount.sclass = "grey lighten-2"
-            cellCount.setStyle("font-weight: bold")
-            cellCount.setParent(row)
+        for (var data : reportData.getEntries()) {
+            Listitem row = new Listitem();
+            dataView.appendChild(row);
 
-            fieldsNames.forEach { fieldName ->
-                Object cellData = data.values[fieldName]
+            count++;
+            Listcell cellCount = new Listcell(Integer.toString(count));
+            cellCount.setSclass("grey lighten-2");
+            cellCount.setStyle("font-weight: bold");
+            cellCount.setParent(row);
 
-                //Compute Totales
+            for (String fieldName : fieldsNames) {
+                Object cellData = data.getValues().get(fieldName);
+
+                // Compute Totals
                 if (cellData instanceof Number) {
-
-                    def fieldTotal = totals[fieldName]
+                    Object fieldTotal = totals.get(fieldName);
                     if (fieldTotal == null) {
                         if (cellData instanceof BigDecimal) {
-                            fieldTotal = BigDecimal.ZERO
+                            fieldTotal = BigDecimal.ZERO;
                         } else if (cellData instanceof Double) {
-                            fieldTotal = 0.0
+                            fieldTotal = 0.0;
                         } else {
-                            fieldTotal = 0
+                            fieldTotal = 0;
                         }
                     }
-                    totals[fieldName] = fieldTotal + cellData
+                    totals.put(fieldName, ((Number) fieldTotal).doubleValue() + ((Number) cellData).doubleValue());
                 }
 
-                def cell = new Listcell()
-                cell.attributes["result"] = cellData
+                Listcell cell = new Listcell();
+                cell.setAttribute("result", cellData);
 
-                def cellValue = new Label()
+                Label cellValue = new Label();
 
-                ReportField reportField = report.findField(fieldName)
+                ReportField reportField = report.findField(fieldName);
                 if (reportField != null) {
-                    switch (reportField.dataType) {
-                        case DataType.CURRENCY:
+                    switch (reportField.getDataType()) {
+                        case CURRENCY:
                             if (cellData instanceof Number) {
-                                cellData = Formatters.formatCurrency(cellData)
+                                cellData = Formatters.formatCurrency((Number) cellData);
                             }
-                            break
+                            break;
                     }
-                    cell.sclass = reportField.cellStyle
-                    cellData = reportField.upperCase ? cellData?.toString()?.toUpperCase() : cellData
+                    cell.setSclass(reportField.getCellStyle());
+                    if (reportField.isUpperCase()) {
+                        cellData = cellData != null ? cellData.toString().toUpperCase() : null;
+                    }
                 }
 
-                cellValue.value = cellData?.toString()
-                cell.appendChild(cellValue)
-                row.appendChild(cell)
+                cellValue.setValue(cellData != null ? cellData.toString() : null);
+                cell.appendChild(cellValue);
+                row.appendChild(cell);
             }
         }
 
-        //render totals
-        totals.entrySet().forEach { entry ->
-            Listfooter footer = dataView.listfoot.children.find {
-                ((Listfooter) it).attributes["reportFieldName"] == entry.key
-            }
+        // Render totals
+        for (Map.Entry<String, Object> entry : totals.entrySet()) {
+            Listfooter footer = dataView.getListfoot().getChildren().stream()
+                    .filter(child -> entry.getKey().equals(((Listfooter) child).getAttribute("reportFieldName")))
+                    .map(child -> (Listfooter) child)
+                    .findFirst()
+                    .orElse(null);
 
             if (footer != null) {
-                def footerValue = entry.value
+                Object footerValue = entry.getValue();
                 if (footerValue != null) {
-                    ReportField reportField = report.findField(entry.key);
+                    ReportField reportField = report.findField(entry.getKey());
                     if (reportField != null) {
-                        switch (reportField.dataType) {
-                            case DataType.CURRENCY:
-                                footerValue = Formatters.formatCurrency(footerValue)
-                                break
-                            case DataType.NUMBER:
+                        switch (reportField.getDataType()) {
+                            case CURRENCY:
+                                footerValue = Formatters.formatCurrency((Number) footerValue);
+                                break;
+                            case NUMBER:
                                 if (footerValue instanceof Double) {
-                                    footerValue = Formatters.formatDecimal(footerValue)
+                                    footerValue = Formatters.formatDecimal((Double) footerValue);
                                 } else {
-                                    footerValue = Formatters.formatInteger(footerValue)
+                                    footerValue = Formatters.formatInteger((Integer) footerValue);
                                 }
+                                break;
                         }
-                        footer.style = reportField.cellStyle
+                        footer.setStyle(reportField.getCellStyle());
                     }
-                    footer.setLabel(footerValue.toString())
+                    footer.setLabel(footerValue.toString());
                 }
             }
         }
-        try {
-            updateChartView()
-        } catch (Exception e) {
-            UIMessages.showMessage(messages.get("errorCharting") + ":${e.message}", MessageType.ERROR)
-            layout.west?.detach()
-        }
 
+        try {
+            updateChartView();
+        } catch (Exception e) {
+            UIMessages.showMessage(messages.get("errorCharting") + ": " + e.getMessage(), MessageType.ERROR);
+            if (layout.getWest() != null) {
+                layout.getWest().detach();
+            }
+        }
     }
 
-    def updateChartView() {
-        if (report.chartable && report.charts && chartsContainer) {
-            chartsContainer.children.clear()
-            currentCharts = []
+    public void updateChartView() {
+        if (report.isChartable() && report.getCharts() != null && chartsContainer != null) {
+            chartsContainer.getChildren().clear();
+            currentCharts.clear();
 
-            def chartLayout = new Vlayout()
-            chartsContainer.appendChild(chartLayout)
+            Vlayout chartLayout = new Vlayout();
+            chartsContainer.appendChild(chartLayout);
 
-            report.charts.forEach { c ->
-                def data = new CategoryChartjsData()
-                if (c.grouped) {
-                    Map<String, Number> groups = new HashMap<>()
-                    reportData.getEntries().forEach {
-                        def label = it.values[c.labelField].toString()
-                        def value = (Number) it.values[c.valueField]
+            for (var c : report.getCharts()) {
+                CategoryChartjsData data = new CategoryChartjsData();
+
+                if (c.isGrouped()) {
+                    Map<String, Number> groups = new HashMap<>();
+                    for (var entry : reportData.getEntries()) {
+                        String label = entry.getValues().get(c.getLabelField()).toString();
+                        Number value = (Number) entry.getValues().get(c.getValueField());
                         if (value == null) {
-                            value = 0
+                            value = 0;
                         }
 
-                        def sum = groups.get(label)
-                        sum = sum == null ? value : sum + value
-                        groups.put(label, sum)
+                        Number sum = groups.get(label);
+                        sum = (sum == null) ? value : sum.doubleValue() + value.doubleValue();
+                        groups.put(label, sum);
                     }
-                    groups.forEach { k, v -> data.add(k, v) }
+                    groups.forEach(data::add);
                 } else {
-                    reportData.getEntries().forEach {
-                        def label = it.values[c.labelField].toString()
-                        def value = (Number) it.values[c.valueField]
-                        data.add(label, value)
+                    for (var entry : reportData.getEntries()) {
+                        String label = entry.getValues().get(c.getLabelField()).toString();
+                        Number value = (Number) entry.getValues().get(c.getValueField());
+                        data.add(label, value);
                     }
                 }
 
-                def chart = new Chartjs()
-                chart.type = c.type
-                chart.data = data
-                chart.title = c.title
-                currentCharts.add(chart)
+                Chartjs chart = new Chartjs();
+                chart.setType(c.getType());
+                chart.setData(data);
+                chart.setTitle(c.getTitle());
+                currentCharts.add(chart);
 
-
-                chartLayout.appendChild(chart)
-                chartLayout.appendChild(new Hr())
+                chartLayout.appendChild(chart);
+                chartLayout.appendChild(new Hr());
             }
         }
     }
 
     private void buildAutoColumns() {
-        dataView.listhead.children.clear()
-        dataView.listfoot.children.clear()
+        dataView.getListhead().getChildren().clear();
+        dataView.getListfoot().getChildren().clear();
 
-        addColumnNumber()
+        addColumnNumber();
 
-        reportData.fieldNames.forEach { fieldName ->
+        for (String fieldName : reportData.getFieldNames()) {
+            Listheader col = new Listheader(
+                    StringUtils.addSpaceBetweenWords(StringUtils.capitalizeAllWords(fieldName))
+            );
+            col.setAttribute("reportFieldName", fieldName);
+            col.setSort("auto");
 
-            Listheader col = new Listheader(StringUtils.addSpaceBetweenWords(StringUtils.capitalizeAllWords(fieldName)))
-            col.attributes["reportFieldName"] = fieldName
-            col.sort = "auto"
-            ReportField reportField = report.fields.find { it.name == fieldName }
+            ReportField reportField = report.getFields().stream()
+                    .filter(field -> field.getName().equals(fieldName))
+                    .findFirst()
+                    .orElse(null);
+
             if (reportField != null) {
-                setupColumn(reportField, col)
+                setupColumn(reportField, col);
             } else {
-                col.addEventListener(Events.ON_SORT, { SortEvent evt ->
-                    reportData.sort(fieldName, evt.ascending)
-                    updateDataView()
-                })
+                col.addEventListener(Events.ON_SORT, event -> {
+                    SortEvent sortEvent = (SortEvent) event;
+                    reportData.sort(fieldName, sortEvent.isAscending());
+                    updateDataView();
+                });
             }
 
-            dataView.listhead.appendChild(col)
-            createFooter(fieldName)
+            dataView.getListhead().appendChild(col);
+            createFooter(fieldName);
         }
     }
 
     private void addColumnNumber() {
-        Listheader colNum = new Listheader("N.")
-        colNum.sclass = "grey color-white"
-        dataView.listhead.appendChild(colNum)
+        Listheader colNum = new Listheader("N.");
+        colNum.setSclass("grey color-white");
+        dataView.getListhead().appendChild(colNum);
 
-        Listfooter footNum = new Listfooter()
-        dataView.listfoot.appendChild(footNum)
+        Listfooter footNum = new Listfooter();
+        dataView.getListfoot().appendChild(footNum);
     }
 
-    private void setupColumn(ReportField reportField, Listheader col) {
-        col.attributes["reportField"] = reportField
-        col.attributes["reportFieldName"] = reportField.name
-        col.align = reportField.align.name()
-        col.label = reportField.label
-        col.width = reportField.width
-        col.sclass = reportField.columnStyle
+    private void setupColumn(final ReportField reportField, Listheader col) {
+        col.getAttributes().put("reportField", reportField);
+        col.getAttributes().put("reportFieldName", reportField.getName());
+        col.setAlign(reportField.getAlign().name());
+        col.setLabel(reportField.getLabel());
+        col.setWidth(reportField.getWidth());
+        col.setSclass(reportField.getColumnStyle());
 
 
-        col.addEventListener(Events.ON_SORT, { SortEvent evt ->
-            reportData.sort(reportField.name, evt.ascending)
-            updateDataView()
-        })
-
+        col.addEventListener(Events.ON_SORT, (SortEvent evt) -> {
+            getReportData().sort(reportField.getName(), evt.isAscending());
+            updateDataView();
+        });
     }
 
-    Button getExecuteButton() {
-        return executeButton
+    public Button getExecuteButton() {
+        return executeButton;
     }
 
-    Button getExportButton() {
-        return exportButton
+    public Button getExportButton() {
+        return exportButton;
     }
 
-    Button getReloadButton() {
-        return reloadButton
+    public Button getReloadButton() {
+        return reloadButton;
     }
 
-    Report getReport() {
-        return report
+    public Report getReport() {
+        return report;
     }
 
-    List<Chartjs> getCurrentCharts() {
-        return currentCharts
+    public List<Chartjs> getCurrentCharts() {
+        return currentCharts;
     }
 
-    ReportData getReportData() {
-        return reportData
+    public ReportData getReportData() {
+        return reportData;
     }
 
-    Borderlayout getLayout() {
-        return layout
+    public Borderlayout getLayout() {
+        return layout;
     }
 
-    Listbox getDataView() {
-        return dataView
+    public Listbox getDataView() {
+        return dataView;
     }
 
-    void addAction(Action action) {
-        actions.add(action)
+    public void addAction(Action action) {
+        actions.add(action);
     }
 
-    def renderActions() {
-        ButtonActionRenderer renderer = new ButtonActionRenderer()
-        renderer.zclass = "btn btn-default"
-        actions.forEach { action ->
-            buttons.appendChild(Actions.render(renderer, action, this))
-        }
+    public void renderActions() {
+        final ButtonActionRenderer renderer = new ButtonActionRenderer();
+        renderer.setZclass("btn btn-default");
+        actions.forEach(action -> {
+            buttons.appendChild(Actions.render(renderer, action, ReportViewer.this));
+        });
 
     }
 
     @Override
-    ActionEvent buildActionEvent(Object source, Map<String, Object> params) {
-        return new ActionEvent(report, this, params)
+    public ActionEvent buildActionEvent(Object source, Map<String, Object> params) {
+        return new ActionEvent(report, this, params);
     }
+
+
 
 }
