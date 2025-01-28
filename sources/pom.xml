@@ -23,7 +23,7 @@
     <packaging>pom</packaging>
     <groupId>tools.dynamia.reports</groupId>
     <artifactId>tools.dynamia.reports.parent</artifactId>
-    <version>2.3.0</version>
+    <version>2.3.1</version>
     <name>DynamiaReports</name>
     <description>DynamiaTools extension for build in app reports with queries and charts</description>
     <inceptionYear>2018</inceptionYear>
@@ -48,12 +48,12 @@
     </scm>
 
     <properties>
-        <dynamiatools.version>5.2.1</dynamiatools.version>
-        <springboot.version>3.3.3</springboot.version>
-        <saas.version>3.1.1</saas.version>
+        <dynamiatools.version>5.3.2</dynamiatools.version>
+        <springboot.version>3.4.1</springboot.version>
+        <saas.version>3.2.1</saas.version>
         <java.version>17</java.version>
 
-        <maven.compiler>3.12.1</maven.compiler>
+        <maven.compiler>3.13.0</maven.compiler>
         <source.encoding>UTF-8</source.encoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -93,38 +93,11 @@
                     <parameters>true</parameters>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.gmavenplus</groupId>
-                <artifactId>gmavenplus-plugin</artifactId>
-                <version>3.0.2</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>addSources</goal>
-                            <goal>addTestSources</goal>
-                            <goal>generateStubs</goal>
-                            <goal>compile</goal>
-                            <goal>generateTestStubs</goal>
-                            <goal>compileTests</goal>
-                            <goal>removeStubs</goal>
-                            <goal>removeTestStubs</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <invokeDynamic>true</invokeDynamic>
-                    <docTitle>Dynamia Reports</docTitle>
-                    <windowTitle>Dynamia Reports</windowTitle>
-                    <footer>Powered By DynamiaTools</footer>
-                    <includeClasspath>PROJECT_AND_PLUGIN</includeClasspath>
-                    <classifier>javadoc</classifier>
-                </configuration>
 
-            </plugin>
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.13</version>
+                <version>1.7.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>ossrh</serverId>
@@ -167,7 +140,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.0.1</version>
+                        <version>3.2.7</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
