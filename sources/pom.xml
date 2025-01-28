@@ -48,9 +48,9 @@
     </scm>
 
     <properties>
-        <dynamiatools.version>5.3.1</dynamiatools.version>
+        <dynamiatools.version>5.3.2</dynamiatools.version>
         <springboot.version>3.4.1</springboot.version>
-        <saas.version>3.2.0</saas.version>
+        <saas.version>3.2.1</saas.version>
         <java.version>17</java.version>
 
         <maven.compiler>3.13.0</maven.compiler>
@@ -140,7 +140,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.2.3</version>
+                        <version>3.2.7</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
