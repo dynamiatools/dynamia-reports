@@ -28,4 +28,5 @@ public class DynamiaReportsApplication {
         return () -> new DynamiaReportsUserModule("view", "View Reports", 0);
     }
 
+
 }
