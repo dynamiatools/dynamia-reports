@@ -1,5 +1,5 @@
 [![Maven Central](https://img.shields.io/maven-central/v/tools.dynamia.reports/tools.dynamia.reports.core)](https://search.maven.org/search?q=tools.dynamia.reports)
-![Java Version Required](https://img.shields.io/badge/java-17-blue)
+![Java Version Required](https://img.shields.io/badge/java-21-blue)
 [![Maven Build](https://github.com/dynamiatools/dynamia-reports/actions/workflows/maven.yml/badge.svg)](https://github.com/dynamiatools/dynamia-reports/actions/workflows/maven.yml)
 [![Release and Deploy](https://github.com/dynamiatools/dynamia-reports/actions/workflows/release.yml/badge.svg)](https://github.com/dynamiatools/dynamia-reports/actions/workflows/release.yml)
 

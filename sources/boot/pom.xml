@@ -3,20 +3,16 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.2</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <groupId>tools.dynamia.reports</groupId>
+        <artifactId>tools.dynamia.reports.parent</artifactId>
+        <version>2.5.0</version>
     </parent>
-    <groupId>tools.dynamia.reports</groupId>
+
     <artifactId>tools.dynamia.reports.boot</artifactId>
-    <version>2.3.1</version>
+    <version>2.5.0</version>
     <name>DynamiaReports</name>
     <description>Very simple report builder</description>
-    <properties>
-        <java.version>17</java.version>
-        <dynamiatools.version>5.3.3</dynamiatools.version>
-    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -78,27 +74,47 @@
         <dependency>
             <groupId>tools.dynamia.themes</groupId>
             <artifactId>tools.dynamia.themes.dynamical</artifactId>
-            <version>5.3.3</version>
+            <version>${dynamiatools.version}</version>
         </dependency>
 
 
         <dependency>
             <groupId>tools.dynamia.reports</groupId>
             <artifactId>tools.dynamia.reports.ui</artifactId>
-            <version>2.3.1</version>
+            <version>2.5.0</version>
         </dependency>
         <dependency>
             <groupId>tools.dynamia.modules</groupId>
             <artifactId>tools.dynamia.modules.security.ui</artifactId>
-            <version>1.0.1</version>
+            <version>1.1.0</version>
         </dependency>
     </dependencies>
 
     <build>
+        <finalName>dynamia-reports</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <image>
+                        <builder>paketobuildpacks/builder-jammy-java-tiny:latest</builder>
+                        <name>docker.dynamia.tools/reports:latest</name>
+                    </image>
+                </configuration>
             </plugin>
         </plugins>
     </build>
