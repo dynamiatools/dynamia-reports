@@ -1,5 +1,6 @@
 package tools.dynamia.reports.boot;
 
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -12,7 +13,7 @@ import tools.dynamia.reports.ui.DynamiaReportsUserModule;
 @SpringBootApplication
 @EnableDynamiaTools
 @EntityScan("tools.dynamia")
-public class DynamiaReportsApplication {
+public class DynamiaReportsApplication implements CommandLineRunner {
 
     public static void main(String[] args) {
         SpringApplication.run(DynamiaReportsApplication.class, args);
@@ -29,4 +30,8 @@ public class DynamiaReportsApplication {
     }
 
 
+    @Override
+    public void run(String... args) throws Exception {
+        System.out.println("Dynamia Reports started...");
+    }
 }

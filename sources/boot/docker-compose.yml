@@ -7,10 +7,12 @@ services:
     restart: unless-stopped
     environment:
       - REPORTS_HOME=/app/reports
+      - SERVER_PORT=8081
+      - SPRING_SERVER_SERVLET_SESSION_TIMEOUT=30m
     volumes:
-      - ./data/reports:/app/reports
+      - reports-data:/app/reports
     ports:
-      - "8080:8080" # Ajusta si tu app expone en otro puerto
+      - "8081:8081"
     networks:
       - dynamia-net
 
@@ -18,3 +20,5 @@ networks:
   dynamia-net:
     driver: bridge
 
+volumes:
+  reports-data:
