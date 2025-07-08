@@ -40,7 +40,7 @@ public class DynamiaReportsUserModule extends Module {
 
     @Override
     public String getIcon() {
-        return "list";
+        return "table";
     }
 
     @Override

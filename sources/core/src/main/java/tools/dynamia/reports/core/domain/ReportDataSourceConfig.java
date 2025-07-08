@@ -1,5 +1,6 @@
 package tools.dynamia.reports.core.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
@@ -16,6 +17,7 @@ public class ReportDataSourceConfig extends SimpleEntitySaaS {
     @NotEmpty
     private String url;
     private String username;
+    @JsonIgnore //ignore for security
     private String password;
     @NotEmpty
     private String driverClassName;

@@ -21,12 +21,12 @@ public class DynamiaReportsApplication implements CommandLineRunner {
 
     @Bean
     public ModuleProvider dynamiaReportsModule() {
-        return () -> new DynamiaReportsModule("reports", "Design Reports", "", 1);
+        return () -> new DynamiaReportsModule("reports", "Reports Design", "", 1);
     }
 
     @Bean
     public ModuleProvider dynamiaReportsUserModule() {
-        return () -> new DynamiaReportsUserModule("view", "View Reports", 0);
+        return () -> new DynamiaReportsUserModule("view", "Reports", 0);
     }
 
 

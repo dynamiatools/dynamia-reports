@@ -76,4 +76,7 @@ public class ReportListViewModel {
         this.reports = reports;
     }
 
+    public ViewReportAction getAction() {
+        return action;
+    }
 }

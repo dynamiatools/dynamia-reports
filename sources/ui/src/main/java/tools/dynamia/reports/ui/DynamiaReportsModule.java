@@ -38,10 +38,10 @@ public class DynamiaReportsModule extends Module {
     public DynamiaReportsModule(String id, String name, String description, double position) {
         super(id, name, description);
 
-        this.reportGroupsPage = new CrudPage("groups", "Reports Groups", ReportGroup.class);
-        this.reportDesignPage = new CrudPage("design", "Reports Design", Report.class);
-        this.reportDatasourcesPage = new CrudPage("datasources", "Reports Datasource", ReportDataSourceConfig.class);
-        this.reportViewerPage = new Page("viewer", "Reports Viewer", "classpath:/zk/dynamia/reports/pages/viewer.zul");
+        this.reportGroupsPage = new CrudPage("groups", "Groups", ReportGroup.class);
+        this.reportDesignPage = new CrudPage("reports", "Reports", Report.class);
+        this.reportDatasourcesPage = new CrudPage("datasources", "Datasources", ReportDataSourceConfig.class);
+        this.reportViewerPage = new Page("viewer", "Viewer", "classpath:/zk/dynamia/reports/pages/viewer.zul");
 
 
         addPage(reportGroupsPage);

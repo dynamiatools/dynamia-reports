@@ -51,7 +51,6 @@ public class Report extends SimpleEntitySaaS {
     private String endpointName;
 
     @ManyToOne
-    @JsonIgnore
     private ReportDataSourceConfig dataSourceConfig;
 
 

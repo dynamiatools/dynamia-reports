@@ -20,6 +20,7 @@ import tools.dynamia.integration.sterotypes.Service;
 import tools.dynamia.modules.saas.api.AccountServiceAPI;
 import tools.dynamia.reports.core.*;
 import tools.dynamia.reports.core.domain.Report;
+import tools.dynamia.reports.core.domain.ReportDataSourceConfig;
 import tools.dynamia.reports.core.domain.ReportFilter;
 import tools.dynamia.reports.core.domain.ReportGroup;
 import tools.dynamia.reports.core.services.ReportsService;
@@ -200,11 +201,22 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
 
             if (report != null) {
                 report.setId(null);
-                report.setName(report.getName() + " (imported)");
                 report.setActive(false);
-                report.setExportWithoutFormat(false);
-                report.setExportEndpoint(false);
-                report.setDataSourceConfig(null);
+
+
+                if(report.getDataSourceConfig()!=null){
+                    try {
+                        var datasource = findDataSource(report.getDataSourceConfig().getName());
+                        if (datasource == null) {
+                            datasource = crudService().create(report.getDataSourceConfig());
+                        }
+                        report.setDataSourceConfig(datasource);
+                    }catch (Exception e){
+                        log("Error setting report datasource, using null",e);
+                        report.setDataSourceConfig(null);
+                    }
+                }
+
                 if (report.getGroup() != null) {
                     report.setGroup(findGroup(report.getGroup().getName()));
                     report.setAccountId(report.getGroup().getAccountId());
@@ -241,6 +253,10 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
             log("Error importing", e);
             throw new ReportsException("Error importing report", e);
         }
+    }
+
+    private ReportDataSourceConfig findDataSource(String name) {
+        return crudService().findSingle(ReportDataSourceConfig.class,"name",QueryConditions.eq(name));
     }
 
     public ReportGroup findGroup(String name) {

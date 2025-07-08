@@ -30,18 +30,18 @@
                             <div sclass="panel-title">
                                 <n:h4 style="margin-bottom: 0">${each.name}</n:h4>
 
+                                </div>
                             </div>
-                        </div>
-                        <div sclass="panel-body" style="padding-top: 0">
-                            <n:span>${each.description}</n:span>
-                        </div>
-                        <div sclass="panel-footer text-right">
-                            <n:i class="fa ${each.chartable?'fa-bar-chart':'fa-table'} fa-2x pull-left"
-                                 style="color: gray"/>
-                            <button zclass="btn btn-primary" label="@load(vm.action.name)"
-                                    onClick="@command('viewReport', report=report)">
-                                <custom-attributes report="${each}"/>
-                            </button>
+                            <div sclass="panel-body" style="padding-top: 0">
+                                <n:span>${each.description}</n:span>
+                            </div>
+                            <div sclass="panel-footer text-right">
+                                <n:i class="fa ${each.chartable?'fa-bar-chart':'fa-table'} fa-2x pull-left"
+                                     style="color: gray"/>
+                                <button zclass="btn btn-primary" label="@load(vm.action.name)"
+                                        onClick="@command('viewReport', report=report)">
+                                    <custom-attributes report="${each}"/>
+                                </button>
 
                         </div>
                     </div>
