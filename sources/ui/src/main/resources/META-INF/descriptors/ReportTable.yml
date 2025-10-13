@@ -10,7 +10,7 @@ fields:
   autofields:
   chartable:
   exportEndpoint:
-  endpointName:
+  fullEndpoint:
   active:
   accountId:
     label: Account
