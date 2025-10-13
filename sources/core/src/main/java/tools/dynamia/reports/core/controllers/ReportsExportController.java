@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import tools.dynamia.commons.DateTimeUtils;
 import tools.dynamia.domain.ValidationError;
 import tools.dynamia.domain.util.DomainUtils;
+import tools.dynamia.reports.api.ReportDTO;
 import tools.dynamia.reports.core.NestedMapReportDataExporter;
 import tools.dynamia.reports.core.ReportFilterOption;
 import tools.dynamia.reports.core.ReportFilters;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@RequestMapping(value = "/api/reports", produces = "application/json")
 public class ReportsExportController {
 
     public static final String DATE_FORMAT = "yyyy-MM-dd";
@@ -35,8 +37,19 @@ public class ReportsExportController {
         this.reportsService = reportsService;
     }
 
-    @GetMapping(value = "/reports/{endpoint}", produces = "application/json")
+    @GetMapping(value = "", produces = "application/json")
+    public ResponseEntity<List<ReportDTO>> getReports() {
+        List<ReportDTO> dtos = reportsService.findExportableReports().stream().map(Report::toDTO).toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping(value = "/{endpoint}", produces = "application/json")
     public ResponseEntity<Map<String, Object>> getReport(@PathVariable("endpoint") String endpoint, HttpServletRequest request) {
+        return getReport(null, endpoint, request);
+    }
+
+    @GetMapping(value = "/{group}/{endpoint}", produces = "application/json")
+    public ResponseEntity<Map<String, Object>> getReport(@PathVariable("group") String group, @PathVariable("endpoint") String endpoint, HttpServletRequest request) {
         List<ReportFilterOption> options = new ArrayList<>();
         request.getParameterNames().asIterator().forEachRemaining(p -> {
             String value = request.getParameter(p);
@@ -45,13 +58,19 @@ public class ReportsExportController {
             }
         });
         ReportFilters filters = new ReportFilters(options);
-        return getReport(endpoint, filters);
+        return getReport(group, endpoint, filters);
     }
 
-    @PostMapping(value = "/reports/{endpoint}", produces = "application/json")
+
+    @PostMapping(value = "/{endpoint}", produces = "application/json")
     public ResponseEntity<Map<String, Object>> getReport(@PathVariable("endpoint") String endpoint, @RequestBody(required = false) ReportFilters filters) {
+        return getReport(null, endpoint, filters);
+    }
+
+    @PostMapping(value = "/{group}/{endpoint}", produces = "application/json")
+    public ResponseEntity<Map<String, Object>> getReport(@PathVariable("group") String group, @PathVariable("endpoint") String endpoint, @RequestBody(required = false) ReportFilters filters) {
         try {
-            Report report = reportsService.findByEndpoint(endpoint);
+            Report report = group != null ? reportsService.findByEndpoint(group, endpoint) : reportsService.findByEndpoint(endpoint);
             if (report == null) {
                 return ResponseEntity.notFound().build();
             }
@@ -148,8 +167,11 @@ public class ReportsExportController {
     }
 
     private Object convertToEntity(String entityClassName, Object value) throws ClassNotFoundException {
-        Long id = Long.parseLong(value.toString());
-        return DomainUtils.lookupCrudService().find(Class.forName(entityClassName), id);
+        try {
+            return Long.parseLong(value.toString());
+        } catch (Exception e) {
+            return value;
+        }
     }
 
     private Object convertToEnum(String enumClassName, Object value) throws ClassNotFoundException {
