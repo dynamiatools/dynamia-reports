@@ -1,5 +1,8 @@
 package tools.dynamia.reports.core.services;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import tools.dynamia.reports.api.ReportDTO;
 import tools.dynamia.reports.core.ReportData;
 import tools.dynamia.reports.core.ReportDataSource;
 import tools.dynamia.reports.core.ReportFilters;
@@ -20,7 +23,12 @@ public interface ReportsService {
 
     Report findByEndpoint(String endpoint);
 
+    @Transactional
+    Report findByEndpoint(String group, String endpoint);
+
     File exportReport(Report report);
 
     Report importReport(File file);
+
+    List<Report> findExportableReports();
 }

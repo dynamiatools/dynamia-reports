@@ -1,6 +1,5 @@
 package tools.dynamia.reports.core.services.impl;
 
-import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import jakarta.persistence.EntityManager;
@@ -31,7 +30,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Service
 @CacheConfig(cacheNames = "reports")
@@ -166,7 +164,30 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
             report = crudService().findSingle(Report.class, QueryParameters.with("endpointName", QueryConditions.eq(endpoint))
                     .add("accountId", accountServiceAPI.getSystemAccountId()));
         }
-        if(report!=null){
+        if (report != null) {
+            Hibernate.initialize(report.getFields());
+            Hibernate.initialize(report.getFilters());
+            Hibernate.initialize(report.getCharts());
+            Hibernate.initialize(report.getGroup());
+        }
+        return report;
+    }
+
+
+    @Transactional
+    @Override
+    public Report findByEndpoint(String group, String endpoint) {
+        var report = crudService().findSingle(Report.class, QueryParameters.with("endpointName", QueryConditions.eq(endpoint))
+                .add("group.endpointName", QueryConditions.eq(group)));
+
+        if (report == null) {
+            //if not fount try to find report in system account
+            report = crudService().findSingle(Report.class, QueryParameters.with("endpointName", QueryConditions.eq(endpoint))
+                    .add("group.endpointName", QueryConditions.eq(group))
+                    .add("accountId", accountServiceAPI.getSystemAccountId()));
+        }
+
+        if (report != null) {
             Hibernate.initialize(report.getFields());
             Hibernate.initialize(report.getFilters());
             Hibernate.initialize(report.getCharts());
@@ -252,5 +273,17 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
             group.save();
         }
         return group;
+    }
+
+    @Override
+    @Cacheable(key = "'ExportableReports'")
+    public List<Report> findExportableReports() {
+        List<Long> accounts = new ArrayList<>();
+        accounts.add(accountServiceAPI.getSystemAccountId());
+        accounts.add(accountServiceAPI.getCurrentAccountId());
+        return crudService().find(Report.class, QueryParameters.with("exportEndpoint", true)
+                .add("active", true)
+                .add("accountId", QueryConditions.in(accounts))
+                .orderBy("name"));
     }
 }
