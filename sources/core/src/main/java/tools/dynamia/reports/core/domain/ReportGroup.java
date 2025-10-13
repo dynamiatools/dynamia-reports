@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Cacheable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import tools.dynamia.domain.Descriptor;
+import tools.dynamia.commons.StringUtils;
 import tools.dynamia.domain.query.QueryParameters;
 import tools.dynamia.domain.util.DomainUtils;
 import tools.dynamia.integration.Containers;
@@ -25,6 +25,7 @@ public class ReportGroup extends SimpleEntitySaaS {
     private String name;
     private String module;
     private boolean active = true;
+    private String endpointName;
 
     public ReportGroup() {
     }
@@ -77,5 +78,15 @@ public class ReportGroup extends SimpleEntitySaaS {
     }
 
 
+    public String getEndpointName() {
+        return endpointName;
+    }
 
+    public void setEndpointName(String endpointName) {
+        if (endpointName != null) {
+            this.endpointName = StringUtils.simplifiedString(endpointName);
+        } else {
+            this.endpointName = null;
+        }
+    }
 }

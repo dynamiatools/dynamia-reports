@@ -5,4 +5,5 @@ autofields: false
 fields:
   name:
   module:
+  endpointName:
   active:
