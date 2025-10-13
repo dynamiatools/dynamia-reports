@@ -6,20 +6,26 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import tools.dynamia.commons.StringUtils;
+import tools.dynamia.domain.Transferable;
 import tools.dynamia.domain.contraints.NotEmpty;
 import tools.dynamia.integration.Containers;
 import tools.dynamia.modules.saas.jpa.SimpleEntitySaaS;
+import tools.dynamia.reports.api.ReportDTO;
+import tools.dynamia.reports.api.ReportFilterDTO;
+import tools.dynamia.reports.core.domain.enums.DataType;
 import tools.dynamia.reports.core.services.ReportsService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Entity
 @Table(name = "rpt_reports")
 @Cacheable
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonFilter("ignoreIds")
-public class Report extends SimpleEntitySaaS {
+public class Report extends SimpleEntitySaaS implements Transferable<ReportDTO> {
 
 
     @ManyToOne
@@ -220,7 +226,12 @@ public class Report extends SimpleEntitySaaS {
     }
 
     public void setEndpointName(String endpointName) {
-        this.endpointName = endpointName;
+        if (endpointName != null) {
+            this.endpointName = StringUtils.simplifiedString(endpointName.trim());
+        } else {
+            this.endpointName = null;
+        }
+
     }
 
     public ReportDataSourceConfig getDataSourceConfig() {
@@ -234,5 +245,59 @@ public class Report extends SimpleEntitySaaS {
     @JsonIgnore
     public List<ReportFilter> getRequiredFilters() {
         return getFilters().stream().filter(ReportFilter::isRequired).toList();
+    }
+
+    @JsonIgnore
+    public String getFullEndpoint() {
+        String path = group != null && group.getEndpointName() != null && !group.getEndpointName().isBlank() ? group.getEndpointName() + "/" : "";
+        return "/api/reports/" + path + getEndpointName();
+    }
+
+    @Override
+    public ReportDTO toDTO() {
+        var dto = new ReportDTO(title, subtitle, name, description, group != null ? group.getName() : null, getFullEndpoint());
+
+        if (filters != null && !filters.isEmpty()) {
+            var filterDTOs = new ArrayList<ReportFilterDTO>();
+            for (ReportFilter f : filters) {
+                var filterDTO = new ReportFilterDTO(f.getName(), f.getDataType().name(), f.getLabel(), f.isRequired());
+
+                if (f.getValues() != null && !f.getValues().isEmpty()) {
+                    filterDTO.setValues(Stream.of(f.getValues().split(","))
+                            .map(String::trim)
+                            .toList());
+                } else if (f.getDataType() == DataType.BOOLEAN) {
+                    filterDTO.setValues(List.of("true", "false"));
+                } else if (f.getDataType() == DataType.ENUM) {
+                    try {
+                        var enumClass = Class.forName(f.getEnumClassName());
+                        if (enumClass.isEnum()) {
+                            var enumValues = new ArrayList<String>();
+                            for (Object constant : enumClass.getEnumConstants()) {
+                                enumValues.add(constant.toString());
+                            }
+                            filterDTO.setValues(enumValues);
+                        }
+                    } catch (ClassNotFoundException e) {
+                        //ignore
+                    }
+                } else if (f.getDataType() == DataType.ENTITY) {
+                    filterDTO.setValues(List.of(f.getEntityClassName(), "id"));
+                }
+
+                if (f.getDataType() == DataType.DATE) {
+                    filterDTO.setFormat("yyyy-MM-dd");
+                } else if (f.getDataType() == DataType.DATE_TIME) {
+                    filterDTO.setFormat("yyyy-MM-dd HH:mm:ss");
+                } else if (f.getDataType() == DataType.TIME) {
+                    filterDTO.setFormat("HH:mm:ss");
+                }
+
+                filterDTOs.add(filterDTO);
+            }
+            dto.setFilters(filterDTOs);
+        }
+
+        return dto;
     }
 }
