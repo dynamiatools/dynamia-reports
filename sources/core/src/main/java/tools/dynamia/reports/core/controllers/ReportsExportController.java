@@ -39,14 +39,10 @@ public class ReportsExportController {
 
     @GetMapping(value = "", produces = "application/json")
     public ResponseEntity<List<ReportDTO>> getReports() {
-        List<ReportDTO> dtos = reportsService.findExportableReports().stream().map(Report::toDTO).toList();
+        List<ReportDTO> dtos = reportsService.findExportableReports(false).stream().map(Report::toDTO).toList();
         return ResponseEntity.ok(dtos);
     }
 
-    @GetMapping(value = "/{endpoint}", produces = "application/json")
-    public ResponseEntity<Map<String, Object>> getReport(@PathVariable("endpoint") String endpoint, HttpServletRequest request) {
-        return getReport(null, endpoint, request);
-    }
 
     @GetMapping(value = "/{group}/{endpoint}", produces = "application/json")
     public ResponseEntity<Map<String, Object>> getReport(@PathVariable("group") String group, @PathVariable("endpoint") String endpoint, HttpServletRequest request) {
@@ -61,11 +57,6 @@ public class ReportsExportController {
         return getReport(group, endpoint, filters);
     }
 
-
-    @PostMapping(value = "/{endpoint}", produces = "application/json")
-    public ResponseEntity<Map<String, Object>> getReport(@PathVariable("endpoint") String endpoint, @RequestBody(required = false) ReportFilters filters) {
-        return getReport(null, endpoint, filters);
-    }
 
     @PostMapping(value = "/{group}/{endpoint}", produces = "application/json")
     public ResponseEntity<Map<String, Object>> getReport(@PathVariable("group") String group, @PathVariable("endpoint") String endpoint, @RequestBody(required = false) ReportFilters filters) {
