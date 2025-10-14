@@ -3,6 +3,7 @@ package tools.dynamia.reports.core.domain;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Cacheable;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tools.dynamia.commons.StringUtils;
@@ -26,6 +27,8 @@ public class ReportGroup extends SimpleEntitySaaS {
     private String module;
     private boolean active = true;
     private String endpointName;
+    @Column(name = "is_system")
+    private boolean system;
 
     public ReportGroup() {
     }
@@ -88,5 +91,13 @@ public class ReportGroup extends SimpleEntitySaaS {
         } else {
             this.endpointName = null;
         }
+    }
+
+    public boolean isSystem() {
+        return system;
+    }
+
+    public void setSystem(boolean system) {
+        this.system = system;
     }
 }
