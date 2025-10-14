@@ -248,9 +248,17 @@ public class Report extends SimpleEntitySaaS implements Transferable<ReportDTO> 
     }
 
     @JsonIgnore
+    @Transient
     public String getFullEndpoint() {
-        String path = group != null && group.getEndpointName() != null && !group.getEndpointName().isBlank() ? group.getEndpointName() + "/" : "";
-        return "/api/reports/" + path + getEndpointName();
+        if (exportEndpoint && endpointName != null && !endpointName.isBlank()) {
+            if (group.getEndpointName() != null && !group.getEndpointName().isBlank()) {
+                return "/api/reports/" + group.getEndpointName() + "/" + getEndpointName();
+            } else {
+                return "Error: Report group [" + group.getName() + "] has no endpoint name defined";
+            }
+        } else {
+            return "";
+        }
     }
 
     @Override
