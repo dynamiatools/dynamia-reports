@@ -51,7 +51,7 @@
         <dynamiatools.version>5.4.5</dynamiatools.version>
         <springboot.version>3.5.5</springboot.version>
         <saas.version>3.4.4</saas.version>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <swaggerannotations.version>2.2.36</swaggerannotations.version>
 
         <maven.compiler>3.13.0</maven.compiler>
