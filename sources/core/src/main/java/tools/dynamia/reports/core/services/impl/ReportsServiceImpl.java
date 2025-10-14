@@ -276,14 +276,32 @@ public class ReportsServiceImpl extends AbstractService implements ReportsServic
     }
 
     @Override
-    @Cacheable(key = "'ExportableReports'")
-    public List<Report> findExportableReports() {
+    @Cacheable(key = "'ExportableReports-'+#includeSystem")
+    @Transactional
+    public List<Report> findExportableReports(boolean includeSystem) {
         List<Long> accounts = new ArrayList<>();
         accounts.add(accountServiceAPI.getSystemAccountId());
         accounts.add(accountServiceAPI.getCurrentAccountId());
-        return crudService().find(Report.class, QueryParameters.with("exportEndpoint", true)
+        var params = QueryParameters.with("exportEndpoint", true)
                 .add("active", true)
                 .add("accountId", QueryConditions.in(accounts))
-                .orderBy("name"));
+                .add("group.active", true)
+                .orderBy("name");
+
+
+        if (!includeSystem) {
+            params.add("group.system", false);
+        }
+
+        var reports = crudService().find(Report.class, params);
+
+        reports.forEach(r -> {
+            Hibernate.initialize(r.getGroup());
+            Hibernate.initialize(r.getFields());
+            Hibernate.initialize(r.getFilters());
+            Hibernate.initialize(r.getCharts());
+        });
+
+        return reports;
     }
 }
